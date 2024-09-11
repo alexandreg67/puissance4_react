@@ -2,14 +2,13 @@
 
 import React, { useState } from 'react';
 import IA, { IAGameState } from './IA';
-import Cell from './Cell';
+import Grid from './Grid';
+import ScoreBoard from './ScoreBoard';
+import GameControls from './GameControls';
+import { CellValue, GameMode, Player } from './Types';
 
 const ROWS = 6;
 const COLS = 7;
-
-type Player = 'Player 1' | 'Player 2';
-type CellValue = 'red' | 'yellow' | null;
-type GameMode = 'Player vs Player' | 'Player vs IA';
 
 const Board: React.FC = () => {
 	const [grid, setGrid] = useState<CellValue[][]>(
@@ -18,12 +17,12 @@ const Board: React.FC = () => {
 	const [currentPlayer, setCurrentPlayer] = useState<Player>('Player 1');
 	const [winner, setWinner] = useState<string | null>(null);
 	const [gameMode, setGameMode] = useState<GameMode | null>(null);
+	const [scores, setScores] = useState({ 'Player 1': 0, 'Player 2': 0 });
 
 	const jouerCase = (colIndex: number, player: Player): number | null => {
 		const newGrid = [...grid];
 		let rowIndex: number | null = null;
 
-		// Trouver la première ligne vide dans la colonne
 		for (let i = ROWS - 1; i >= 0; i--) {
 			if (newGrid[i][colIndex] === null) {
 				newGrid[i][colIndex] = player === 'Player 1' ? 'red' : 'yellow';
@@ -40,19 +39,21 @@ const Board: React.FC = () => {
 	};
 
 	const handleClick = (colIndex: number) => {
-		// Si le jeu est terminé ou c'est au tour de l'IA, on ne fait rien
 		if (winner || (gameMode === 'Player vs IA' && currentPlayer === 'Player 2'))
 			return;
 
 		const rowIndex = jouerCase(colIndex, currentPlayer);
-		if (rowIndex === null) return; // Si la colonne est pleine, on ne fait rien
+		if (rowIndex === null) return;
 
 		if (checkWin(rowIndex, colIndex, currentPlayer)) {
 			setWinner(currentPlayer);
+			setScores({
+				...scores,
+				[currentPlayer]: scores[currentPlayer] + 1,
+			});
 			return;
 		}
 
-		// Changer de joueur
 		const nextPlayer = currentPlayer === 'Player 1' ? 'Player 2' : 'Player 1';
 		setCurrentPlayer(nextPlayer);
 
@@ -74,12 +75,16 @@ const Board: React.FC = () => {
 		const colIA = IA.choixColonne(gameState);
 
 		const rowIndex = jouerCase(colIA, 'Player 2');
-		if (rowIndex === null) return; // Si la colonne est pleine, on ne fait rien
+		if (rowIndex === null) return;
 
 		if (checkWin(rowIndex, colIA, 'Player 2')) {
 			setWinner('Player 2');
+			setScores({
+				...scores,
+				'Player 2': scores['Player 2'] + 1,
+			});
 		} else {
-			setCurrentPlayer('Player 1'); // Retour à Player 1
+			setCurrentPlayer('Player 1');
 		}
 	};
 
@@ -104,6 +109,13 @@ const Board: React.FC = () => {
 	const startGame = (mode: GameMode) => {
 		setGameMode(mode);
 		resetGame();
+		setScores({ 'Player 1': 0, 'Player 2': 0 });
+	};
+
+	const changeMode = () => {
+		setGameMode(null);
+		resetGame();
+		setScores({ 'Player 1': 0, 'Player 2': 0 });
 	};
 
 	return (
@@ -130,47 +142,26 @@ const Board: React.FC = () => {
 
 			{gameMode && (
 				<>
-					{winner && (
-						<div className="fixed top-0 left-0 right-0 bg-white bg-opacity-90 p-4 flex flex-col items-center z-50">
-							<div className="text-2xl font-bold text-green-500 mb-4">
-								{winner} a gagné !
-							</div>
-							<button
-								onClick={resetGame}
-								className="p-2 bg-blue-500 text-white rounded-lg"
-							>
-								Recommencer le jeu
-							</button>
-						</div>
-					)}
+					<ScoreBoard scores={scores} gameMode={gameMode} />
 
-					<div className="flex flex-col md:flex-row justify-center items-center w-full mt-4 space-y-4 md:space-y-0 md:space-x-4">
-						<div className="flex flex-col items-center space-y-2">
-							<div className="text-xl font-semibold text-gray-700">
-								Joueur 1
-							</div>
-							<div className="h-12 w-12 rounded-full bg-red-500"></div>
-						</div>
+					<div className="flex flex-col items-center w-full space-y-4">
+						<button
+							onClick={changeMode}
+							className="p-2 bg-red-500 text-white rounded-lg"
+						>
+							Changer de Mode
+						</button>
 
-						<div className="grid grid-cols-7 gap-2">
-							{grid.map((row, rowIndex) => (
-								<React.Fragment key={rowIndex}>
-									{row.map((cell, colIndex) => (
-										<div key={colIndex} onClick={() => handleClick(colIndex)}>
-											<Cell color={cell} />
-										</div>
-									))}
-								</React.Fragment>
-							))}
-						</div>
-
-						<div className="flex flex-col items-center space-y-2">
-							<div className="text-xl font-semibold text-gray-700">
-								{gameMode === 'Player vs IA' ? 'IA' : 'Joueur 2'}
-							</div>
-							<div className="h-12 w-12 rounded-full bg-yellow-500"></div>
-						</div>
+						<Grid grid={grid} handleClick={handleClick} />
 					</div>
+
+					{winner && (
+						<GameControls
+							winner={winner}
+							resetGame={resetGame}
+							setGameMode={setGameMode}
+						/>
+					)}
 				</>
 			)}
 		</div>
