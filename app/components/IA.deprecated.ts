@@ -1,3 +1,18 @@
+/**
+ * @deprecated This file is deprecated and should not be used.
+ * Use the new AI system instead:
+ * - app/ai/ConnectFourAI.ts for the AI engine
+ * - app/ai/AIManager.ts for AI management
+ * 
+ * The new system provides:
+ * - Multiple difficulty levels (Easy, Medium, Hard, Expert)
+ * - Better AI algorithms with minimax and alpha-beta pruning
+ * - Proper threat detection and strategic play
+ * - Real-time difficulty switching
+ * 
+ * This file is kept for reference only.
+ */
+
 export interface IAGameState {
 	grid: number[][]; // 0 = empty, 1 = player 1, 2 = IA
 	nbLigne: number;
