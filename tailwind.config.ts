@@ -9,6 +9,11 @@ const config: Config = {
   ],
   theme: {
     extend: {
+      // Add extra small breakpoint for better mobile support
+      screens: {
+        'xs': '375px',
+      },
+      
       // Neon Futuristic Color Palette
       colors: {
         // Primary neon colors

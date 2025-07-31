@@ -20,8 +20,8 @@ const CellComponent: React.FC<OptimizedCellProps> = ({
   'data-testid': testId
 }) => {
   // RESPONSIVE: Get device-specific configurations
-  const { deviceType } = useResponsive();
-  const gridConfig = getGridConfig(deviceType);
+  const { deviceType, windowSize } = useResponsive();
+  const gridConfig = getGridConfig(deviceType, windowSize.width);
   const animationConfig = getAnimationConfig(deviceType);
   const interactionConfig = getInteractionConfig(deviceType);
 

@@ -14,10 +14,10 @@ type ScoreBoardProps = {
 
 const ScoreBoardComponent: React.FC<ScoreBoardProps> = ({ scores, gameMode }) => {
 	// RESPONSIVE: Get device-specific configurations
-	const { deviceType } = useResponsive();
+	const { deviceType, windowSize } = useResponsive();
 	const layoutConfig = getLayoutConfig(deviceType);
-	const spacingConfig = getSpacingConfig(deviceType);
-	const textConfig = getTextConfig(deviceType);
+	const spacingConfig = getSpacingConfig(deviceType, windowSize.width);
+	const textConfig = getTextConfig(deviceType, windowSize.width);
 
 	// PERFORMANCE FIX: Memoize player displays with cyberpunk styling
 	const player1Display = useMemo(() => (

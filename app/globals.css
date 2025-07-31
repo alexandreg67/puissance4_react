@@ -10,9 +10,17 @@
 @layer base {
   html {
     scroll-behavior: smooth;
+    /* Prevent horizontal scrolling on mobile */
+    overflow-x: hidden;
+    width: 100%;
+    max-width: 100vw;
   }
   
   body {
+    /* Prevent horizontal scrolling on mobile */
+    overflow-x: hidden;
+    width: 100%;
+    max-width: 100vw;
     background: linear-gradient(135deg, #0A0A0A 0%, #000814 50%, #1A0D2E 100%);
     background-attachment: fixed;
     color: #FFFFFF;

@@ -19,9 +19,9 @@ const GridComponent: React.FC<OptimizedGridProps> = ({
   lastMove 
 }) => {
   // RESPONSIVE: Get device-specific configurations
-  const { deviceType } = useResponsive();
-  const gridConfig = getGridConfig(deviceType);
-  const spacingConfig = getSpacingConfig(deviceType);
+  const { deviceType, windowSize } = useResponsive();
+  const gridConfig = getGridConfig(deviceType, windowSize.width);
+  const spacingConfig = getSpacingConfig(deviceType, windowSize.width);
   
   // Memoized click handler to prevent recreating on every render
   const handleCellClick = useCallback((columnIndex: number) => {

@@ -185,23 +185,23 @@ const GameContent: React.FC = memo(() => {
   }
 
   return (
-    <div className="flex flex-col items-center space-y-8 w-full max-w-5xl mx-auto p-6 matrix-bg min-h-screen">
+    <div className="flex flex-col items-center space-y-4 xs:space-y-6 sm:space-y-8 w-full max-w-5xl mx-auto p-2 xs:p-4 sm:p-6 matrix-bg min-h-screen">
       {/* Cyberpunk Header */}
-      <div className="text-center space-y-6 py-8">
+      <div className="text-center space-y-3 xs:space-y-4 sm:space-y-6 py-4 xs:py-6 sm:py-8">
         <div className="relative">
-          <h1 className="text-6xl md:text-7xl font-display font-black text-transparent bg-clip-text bg-neon-gradient-1 text-shadow-neon-intense animate-matrix-reveal tracking-wider">
+          <h1 className="text-3xl xs:text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-display font-black text-transparent bg-clip-text bg-neon-gradient-1 text-shadow-neon-intense animate-matrix-reveal tracking-wider">
             CONNECT FOUR
           </h1>
-          <div className="absolute -top-2 -left-2 text-6xl md:text-7xl font-display font-black text-neon-cyan opacity-20 -z-10 blur-sm">
+          <div className="absolute -top-2 -left-2 text-3xl xs:text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-display font-black text-neon-cyan opacity-20 -z-10 blur-sm">
             CONNECT FOUR
           </div>
         </div>
         
         {/* Mode indicator with HUD styling */}
-        <div className="hud-panel text-neon-cyan border-neon-cyan inline-block px-6 py-2 rounded-full">
+        <div className="hud-panel text-neon-cyan border-neon-cyan inline-block px-3 xs:px-4 sm:px-6 py-1.5 xs:py-2 rounded-full">
           <div className="flex items-center space-x-3">
             <div className="w-2 h-2 bg-current rounded-full animate-neon-pulse"></div>
-            <span className="font-mono text-sm tracking-widest uppercase">
+            <span className="font-mono text-xs xs:text-sm tracking-widest uppercase">
               MODE: {gameMode === 'Player vs Player' ? 'PvP' : 'PvAI'}
             </span>
             <div className="w-2 h-2 bg-current rounded-full animate-neon-pulse" style={{ animationDelay: '1s' }}></div>
@@ -266,7 +266,7 @@ const GameContent: React.FC = memo(() => {
       </div>
       
       {/* Cyberpunk footer decoration */}
-      <div className="flex justify-center space-x-1 opacity-20 mt-8">
+      <div className="flex justify-center space-x-1 opacity-20 mt-4 xs:mt-6 sm:mt-8">
         {Array.from({ length: 7 }, (_, i) => (
           <div 
             key={i}

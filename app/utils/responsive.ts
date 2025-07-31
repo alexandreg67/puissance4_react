@@ -61,31 +61,42 @@ export const useResponsive = () => {
   };
 };
 
-// Responsive grid configurations
-export const getGridConfig = (deviceType: 'mobile' | 'tablet' | 'desktop') => {
+// Responsive grid configurations with viewport awareness
+export const getGridConfig = (deviceType: 'mobile' | 'tablet' | 'desktop', windowWidth?: number) => {
   switch (deviceType) {
     case 'mobile':
+      // Extra small screens (< 375px) - very compact
+      if (windowWidth && windowWidth < 375) {
+        return {
+          cellSize: 'w-8 h-8 xs:w-10 xs:h-10 sm:w-12 sm:h-12',
+          gap: 'gap-1 sm:gap-2',
+          gridPadding: 'p-2 sm:p-4',
+          fontSize: 'text-xs sm:text-sm',
+          iconSize: 'w-3 h-3 sm:w-4 sm:h-4',
+        };
+      }
+      // Small screens (375px - 640px) - compact but readable
       return {
-        cellSize: 'w-12 h-12 sm:w-16 sm:h-16',
-        gap: 'gap-2',
-        gridPadding: 'p-4',
+        cellSize: 'w-10 h-10 xs:w-12 xs:h-12 sm:w-14 sm:h-14',
+        gap: 'gap-1.5 sm:gap-2',
+        gridPadding: 'p-3 sm:p-4',
         fontSize: 'text-sm',
         iconSize: 'w-4 h-4',
       };
     case 'tablet':
       return {
-        cellSize: 'w-16 h-16 md:w-18 md:h-18',
-        gap: 'gap-2.5',
-        gridPadding: 'p-6',
+        cellSize: 'w-14 h-14 md:w-16 md:h-16 lg:w-18 lg:h-18',
+        gap: 'gap-2 md:gap-2.5',
+        gridPadding: 'p-4 md:p-6',
         fontSize: 'text-base',
         iconSize: 'w-5 h-5',
       };
     case 'desktop':
     default:
       return {
-        cellSize: 'w-20 h-20',
-        gap: 'gap-3',
-        gridPadding: 'p-8',
+        cellSize: 'w-18 h-18 lg:w-20 lg:h-20',
+        gap: 'gap-2.5 lg:gap-3',
+        gridPadding: 'p-6 lg:p-8',
         fontSize: 'text-lg',
         iconSize: 'w-6 h-6',
       };
@@ -128,10 +139,20 @@ export const getInteractionConfig = (deviceType: 'mobile' | 'tablet' | 'desktop'
   };
 };
 
-// Responsive text scaling
-export const getTextConfig = (deviceType: 'mobile' | 'tablet' | 'desktop') => {
+// Responsive text scaling with viewport awareness
+export const getTextConfig = (deviceType: 'mobile' | 'tablet' | 'desktop', windowWidth?: number) => {
   switch (deviceType) {
     case 'mobile':
+      // Extra small screens need even smaller text
+      if (windowWidth && windowWidth < 375) {
+        return {
+          title: 'text-2xl xs:text-3xl sm:text-4xl',
+          subtitle: 'text-base xs:text-lg sm:text-xl',
+          body: 'text-xs xs:text-sm sm:text-base',
+          caption: 'text-xs',
+          button: 'text-xs xs:text-sm font-semibold',
+        };
+      }
       return {
         title: 'text-3xl sm:text-4xl',
         subtitle: 'text-lg sm:text-xl',
@@ -150,8 +171,8 @@ export const getTextConfig = (deviceType: 'mobile' | 'tablet' | 'desktop') => {
     case 'desktop':
     default:
       return {
-        title: 'text-6xl md:text-7xl',
-        subtitle: 'text-2xl md:text-3xl',
+        title: 'text-5xl lg:text-6xl xl:text-7xl',
+        subtitle: 'text-xl lg:text-2xl xl:text-3xl',
         body: 'text-lg',
         caption: 'text-base',
         button: 'text-lg font-bold',
@@ -159,29 +180,38 @@ export const getTextConfig = (deviceType: 'mobile' | 'tablet' | 'desktop') => {
   }
 };
 
-// Spacing configurations for different screen sizes
-export const getSpacingConfig = (deviceType: 'mobile' | 'tablet' | 'desktop') => {
+// Spacing configurations for different screen sizes with viewport awareness
+export const getSpacingConfig = (deviceType: 'mobile' | 'tablet' | 'desktop', windowWidth?: number) => {
   switch (deviceType) {
     case 'mobile':
+      // Extra small screens need minimal spacing
+      if (windowWidth && windowWidth < 375) {
+        return {
+          containerPadding: 'px-2 py-2 xs:px-4 xs:py-4',
+          sectionSpacing: 'space-y-2 xs:space-y-3 sm:space-y-4',
+          cardPadding: 'p-2 xs:p-3 sm:p-4',
+          buttonPadding: 'px-3 py-1.5 xs:px-4 xs:py-2',
+        };
+      }
       return {
-        containerPadding: 'px-4 py-4',
-        sectionSpacing: 'space-y-4',
-        cardPadding: 'p-4',
+        containerPadding: 'px-3 py-3 sm:px-4 sm:py-4',
+        sectionSpacing: 'space-y-3 sm:space-y-4',
+        cardPadding: 'p-3 sm:p-4',
         buttonPadding: 'px-4 py-2',
       };
     case 'tablet':
       return {
-        containerPadding: 'px-6 py-6',
-        sectionSpacing: 'space-y-6',
-        cardPadding: 'p-6',
+        containerPadding: 'px-4 py-4 md:px-6 md:py-6',
+        sectionSpacing: 'space-y-4 md:space-y-6',
+        cardPadding: 'p-4 md:p-6',
         buttonPadding: 'px-6 py-3',
       };
     case 'desktop':
     default:
       return {
-        containerPadding: 'px-8 py-8',
-        sectionSpacing: 'space-y-8',
-        cardPadding: 'p-8',
+        containerPadding: 'px-6 py-6 lg:px-8 lg:py-8',
+        sectionSpacing: 'space-y-6 lg:space-y-8',
+        cardPadding: 'p-6 lg:p-8',
         buttonPadding: 'px-8 py-4',
       };
   }
