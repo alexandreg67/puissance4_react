@@ -10,10 +10,30 @@ import { AIDifficultySelector } from './AIDifficultySelector';
 
 // Loading component
 const GameLoading: React.FC = memo(() => (
-  <div className="flex items-center justify-center min-h-[400px]">
-    <div className="flex flex-col items-center space-y-4">
-      <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
-      <p className="text-gray-600 font-medium">Chargement du jeu...</p>
+  <div className="flex items-center justify-center min-h-[400px] matrix-bg">
+    <div className="flex flex-col items-center space-y-6">
+      {/* Cyberpunk loading spinner */}
+      <div className="relative">
+        <div className="animate-spin rounded-full h-16 w-16 border-4 border-transparent">
+          <div className="absolute inset-0 rounded-full border-4 border-neon-cyan border-t-transparent animate-spin"></div>
+          <div className="absolute inset-2 rounded-full border-2 border-neon-magenta border-b-transparent animate-spin" style={{ animationDirection: 'reverse', animationDuration: '1.5s' }}></div>
+        </div>
+        <div className="absolute inset-0 flex items-center justify-center">
+          <div className="w-2 h-2 bg-neon-cyan rounded-full animate-neon-pulse"></div>
+        </div>
+      </div>
+      
+      {/* Loading text with neon effect */}
+      <div className="text-center space-y-2">
+        <p className="text-neon-cyan font-mono text-lg tracking-wider text-shadow-neon-sm animate-neon-pulse">
+          INITIALIZING GAME MATRIX...
+        </p>
+        <div className="flex justify-center space-x-1">
+          <div className="w-2 h-1 bg-neon-cyan animate-neon-pulse"></div>
+          <div className="w-2 h-1 bg-neon-cyan animate-neon-pulse" style={{ animationDelay: '0.2s' }}></div>
+          <div className="w-2 h-1 bg-neon-cyan animate-neon-pulse" style={{ animationDelay: '0.4s' }}></div>
+        </div>
+      </div>
     </div>
   </div>
 ));
@@ -25,35 +45,65 @@ const GameModeSelection: React.FC = memo(() => {
   const { startGame } = useGameActions();
 
   return (
-    <div className="flex flex-col items-center space-y-6 p-8">
-      <h2 className="text-3xl font-bold text-gray-800 mb-4">
-        Choisissez un mode de jeu
-      </h2>
+    <div className="flex flex-col items-center space-y-8 p-8 matrix-bg">
+      {/* Cyberpunk title with glitch effect */}
+      <div className="text-center space-y-4">
+        <h2 className="text-4xl font-display font-black text-neon-cyan text-shadow-neon-lg animate-matrix-reveal tracking-widest">
+          SELECT GAME MODE
+        </h2>
+        <div className="h-px w-32 mx-auto bg-gradient-to-r from-transparent via-neon-cyan to-transparent opacity-60"></div>
+      </div>
       
-      <div className="flex flex-col sm:flex-row gap-4">
+      {/* Futuristic game mode buttons */}
+      <div className="flex flex-col sm:flex-row gap-6">
         <button
           onClick={() => startGame('Player vs Player')}
-          className="px-8 py-4 bg-gradient-to-r from-blue-500 to-blue-600 text-white font-bold rounded-xl shadow-lg hover:shadow-xl hover:from-blue-600 hover:to-blue-700 transition-all duration-200 ease-out"
+          className="group relative px-10 py-6 neon-button text-neon-blue border-neon-blue hover:text-white transition-colors duration-300"
           style={{
             transform: 'translateZ(0)',
             backfaceVisibility: 'hidden',
-            willChange: 'box-shadow, background-image'
+            willChange: 'box-shadow, background-image, color'
           }}
         >
-          👥 Joueur contre Joueur
+          <div className="flex items-center space-x-3">
+            <span className="text-2xl">👥</span>
+            <div className="text-left">
+              <div className="font-bold text-sm tracking-wider">PLAYER VS</div>
+              <div className="font-bold text-lg tracking-wider">PLAYER</div>
+            </div>
+          </div>
+          
+          {/* Hologram sweep effect */}
+          <div className="absolute inset-0 bg-hologram-gradient opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none rounded"></div>
         </button>
         
         <button
           onClick={() => startGame('Player vs IA')}
-          className="px-8 py-4 bg-gradient-to-r from-purple-500 to-purple-600 text-white font-bold rounded-xl shadow-lg hover:shadow-xl hover:from-purple-600 hover:to-purple-700 transition-all duration-200 ease-out"
+          className="group relative px-10 py-6 neon-button text-neon-magenta border-neon-magenta hover:text-white transition-colors duration-300"
           style={{
             transform: 'translateZ(0)',
             backfaceVisibility: 'hidden',
-            willChange: 'box-shadow, background-image'
+            willChange: 'box-shadow, background-image, color'
           }}
         >
-          🤖 Joueur contre IA
+          <div className="flex items-center space-x-3">
+            <span className="text-2xl">🤖</span>
+            <div className="text-left">
+              <div className="font-bold text-sm tracking-wider">PLAYER VS</div>
+              <div className="font-bold text-lg tracking-wider">A.I.</div>
+            </div>
+          </div>
+          
+          {/* Hologram sweep effect */}
+          <div className="absolute inset-0 bg-hologram-gradient opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none rounded"></div>
         </button>
+      </div>
+      
+      {/* Additional cyberpunk decoration */}
+      <div className="flex space-x-2 opacity-40">
+        <div className="w-2 h-2 bg-neon-cyan rounded-full animate-neon-pulse"></div>
+        <div className="w-2 h-2 bg-neon-magenta rounded-full animate-neon-pulse" style={{ animationDelay: '0.5s' }}></div>
+        <div className="w-2 h-2 bg-neon-green rounded-full animate-neon-pulse" style={{ animationDelay: '1s' }}></div>
       </div>
     </div>
   );
@@ -69,23 +119,53 @@ const GameStatus: React.FC = memo(() => {
   const statusContent = useMemo(() => {
     if (winner) {
       return (
-        <div className="text-2xl font-bold text-green-600 text-center p-4 bg-green-50 rounded-xl border-2 border-green-200">
-          🎉 {winner} a gagné !
+        <div className="hud-panel text-success-neon border-success-neon rounded-xl p-4 text-center animate-victory-glow">
+          <div className="flex items-center justify-center space-x-3">
+            <span className="text-3xl">🏆</span>
+            <div>
+              <div className="text-sm font-mono tracking-wider opacity-80">VICTORY</div>
+              <div className="text-xl font-display font-bold text-shadow-neon-md">
+                {winner} WINS!
+              </div>
+            </div>
+            <span className="text-3xl">🏆</span>
+          </div>
         </div>
       );
     }
 
     if (!canMakeMove && gameMode === 'Player vs IA' && currentPlayer === 2) {
       return (
-        <div className="text-xl font-semibold text-purple-600 text-center p-3 bg-purple-50 rounded-lg border border-purple-200">
-          🤖 L&apos;IA réfléchit...
+        <div className="hud-panel text-neon-magenta border-neon-magenta rounded-lg p-3 text-center">
+          <div className="flex items-center justify-center space-x-3">
+            <div className="animate-spin w-5 h-5 border-2 border-current border-t-transparent rounded-full"></div>
+            <div>
+              <div className="text-sm font-mono tracking-wider opacity-80">A.I. PROCESSING</div>
+              <div className="text-lg font-display font-semibold text-shadow-neon-sm">
+                Calculating optimal move...
+              </div>
+            </div>
+            <span className="text-xl animate-neon-pulse">🤖</span>
+          </div>
         </div>
       );
     }
 
+    const playerColor = currentPlayer === 1 ? 'neon-cyan' : 'neon-yellow';
+    const playerEmoji = currentPlayer === 1 ? '🔵' : '🟡';
+    const playerName = currentPlayer === 1 ? 'PLAYER 1' : 'PLAYER 2';
+
     return (
-      <div className="text-xl font-semibold text-blue-600 text-center p-3 bg-blue-50 rounded-lg border border-blue-200">
-        {currentPlayer === 1 ? '🔴' : '🟡'} Au tour du {currentPlayer === 1 ? 'Joueur 1' : 'Joueur 2'}
+      <div className={`hud-panel text-${playerColor} border-${playerColor} rounded-lg p-3 text-center animate-neon-pulse-slow`}>
+        <div className="flex items-center justify-center space-x-3">
+          <span className="text-2xl animate-neon-pulse">{playerEmoji}</span>
+          <div>
+            <div className="text-sm font-mono tracking-wider opacity-80">CURRENT TURN</div>
+            <div className="text-lg font-display font-bold text-shadow-neon-sm">
+              {playerName}
+            </div>
+          </div>
+        </div>
       </div>
     );
   }, [winner, canMakeMove, gameMode, currentPlayer]);
@@ -105,15 +185,35 @@ const GameContent: React.FC = memo(() => {
   }
 
   return (
-    <div className="flex flex-col items-center space-y-6 w-full max-w-4xl mx-auto p-4">
-      {/* Header */}
-      <div className="text-center space-y-2">
-        <h1 className="text-5xl font-bold text-gray-800 mb-2">
-          🔴 Puissance 4 🟡
-        </h1>
-        <p className="text-gray-600 font-medium">
-          Mode: {gameMode === 'Player vs Player' ? 'Joueur vs Joueur' : 'Joueur vs IA'}
-        </p>
+    <div className="flex flex-col items-center space-y-8 w-full max-w-5xl mx-auto p-6 matrix-bg min-h-screen">
+      {/* Cyberpunk Header */}
+      <div className="text-center space-y-6 py-8">
+        <div className="relative">
+          <h1 className="text-6xl md:text-7xl font-display font-black text-transparent bg-clip-text bg-neon-gradient-1 text-shadow-neon-intense animate-matrix-reveal tracking-wider">
+            CONNECT FOUR
+          </h1>
+          <div className="absolute -top-2 -left-2 text-6xl md:text-7xl font-display font-black text-neon-cyan opacity-20 -z-10 blur-sm">
+            CONNECT FOUR
+          </div>
+        </div>
+        
+        {/* Mode indicator with HUD styling */}
+        <div className="hud-panel text-neon-cyan border-neon-cyan inline-block px-6 py-2 rounded-full">
+          <div className="flex items-center space-x-3">
+            <div className="w-2 h-2 bg-current rounded-full animate-neon-pulse"></div>
+            <span className="font-mono text-sm tracking-widest uppercase">
+              MODE: {gameMode === 'Player vs Player' ? 'PvP' : 'PvAI'}
+            </span>
+            <div className="w-2 h-2 bg-current rounded-full animate-neon-pulse" style={{ animationDelay: '1s' }}></div>
+          </div>
+        </div>
+        
+        {/* Decorative cyber lines */}
+        <div className="flex justify-center space-x-4 opacity-30">
+          <div className="w-16 h-px bg-gradient-to-r from-transparent to-neon-cyan"></div>
+          <div className="w-2 h-2 bg-neon-cyan rounded-full animate-neon-pulse"></div>
+          <div className="w-16 h-px bg-gradient-to-l from-transparent to-neon-cyan"></div>
+        </div>
       </div>
 
       {/* AI Difficulty Selector - Only show when playing against AI */}
@@ -142,16 +242,41 @@ const GameContent: React.FC = memo(() => {
         lastMove={lastMove}
       />
 
-      {/* Game Controls */}
-      <div className="flex flex-wrap justify-center gap-4 mt-6">
+      {/* Cyberpunk Game Controls */}
+      <div className="flex flex-wrap justify-center gap-6 mt-8">
         <button
           onClick={changeMode}
-          className="px-6 py-3 bg-red-500 text-white font-semibold rounded-lg hover:bg-red-600 transition-colors shadow-md"
+          className="neon-button text-neon-orange border-neon-orange hover:text-white group relative"
+          style={{
+            transform: 'translateZ(0)',
+            backfaceVisibility: 'hidden',
+            willChange: 'box-shadow, color'
+          }}
         >
-          🔄 Changer de Mode
+          <div className="flex items-center space-x-2">
+            <span className="text-lg group-hover:animate-spin transition-transform duration-300">🔄</span>
+            <span className="font-bold tracking-wider">CHANGE MODE</span>
+          </div>
+          
+          {/* Hologram sweep effect */}
+          <div className="absolute inset-0 bg-hologram-gradient opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none rounded"></div>
         </button>
         
         {/* Reset button will be handled by GameControls when there's a winner */}
+      </div>
+      
+      {/* Cyberpunk footer decoration */}
+      <div className="flex justify-center space-x-1 opacity-20 mt-8">
+        {Array.from({ length: 7 }, (_, i) => (
+          <div 
+            key={i}
+            className="w-1 bg-neon-cyan"
+            style={{ 
+              height: `${Math.random() * 20 + 10}px`,
+              animationDelay: `${i * 0.1}s`
+            }}
+          ></div>
+        ))}
       </div>
     </div>
   );
@@ -184,8 +309,16 @@ export const ModernBoard: React.FC = memo(() => {
   return (
     <ErrorBoundary fallback={<GameErrorFallback />}>
       <GameProvider>
-        <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 py-8">
-          <div className="container mx-auto px-4">
+        <div className="min-h-screen cyber-grid relative overflow-hidden">
+          {/* Animated background particles */}
+          <div className="absolute inset-0 pointer-events-none">
+            <div className="absolute top-1/4 left-1/4 w-2 h-2 bg-neon-cyan rounded-full animate-neon-pulse opacity-30"></div>
+            <div className="absolute top-1/3 right-1/3 w-1 h-1 bg-neon-magenta rounded-full animate-neon-pulse-fast opacity-20" style={{ animationDelay: '2s' }}></div>
+            <div className="absolute bottom-1/4 left-1/3 w-1.5 h-1.5 bg-neon-green rounded-full animate-neon-pulse-slow opacity-25" style={{ animationDelay: '1s' }}></div>
+            <div className="absolute top-2/3 right-1/4 w-1 h-1 bg-neon-yellow rounded-full animate-neon-pulse opacity-30" style={{ animationDelay: '3s' }}></div>
+          </div>
+          
+          <div className="container mx-auto px-4 relative z-10">
             <Suspense fallback={<GameLoading />}>
               <GameContent />
             </Suspense>

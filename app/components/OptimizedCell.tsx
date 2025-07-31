@@ -18,40 +18,48 @@ const CellComponent: React.FC<OptimizedCellProps> = ({
   onClick,
   'data-testid': testId
 }) => {
-  // PERFORMANCE FIX: Memoize expensive style calculations
+  // PERFORMANCE FIX: Memoize expensive style calculations with cyberpunk theme
   const cellStyles = useMemo(() => {
-    const baseClasses = 'w-16 h-16 rounded-full border-2 focus:outline-none';
+    const baseClasses = 'relative w-20 h-20 rounded-full border-2 focus:outline-none overflow-hidden';
     
-    // GPU ACCELERATION FIX: Add transform and will-change for hardware acceleration
-    const performanceClasses = 'transform-gpu will-change-auto backface-visibility-hidden';
+    // GPU ACCELERATION FIX: Enhanced hardware acceleration for neon effects
+    const performanceClasses = 'transform-gpu will-change-transform backface-visibility-hidden transition-all duration-300 ease-out';
     
     let colorClasses = '';
     let hoverClasses = '';
+    let neonEffect = '';
     
     switch (value) {
       case 1: 
-        colorClasses = 'bg-red-500 border-red-300 shadow-lg';
-        hoverClasses = isClickable ? 'hover:shadow-red-500/50' : '';
+        // Player 1: Neon Cyan pieces with energy core
+        colorClasses = 'bg-gradient-radial from-neon-cyan/90 via-neon-cyan/70 to-neon-cyan/50 border-neon-cyan shadow-neon-cyan';
+        hoverClasses = isClickable ? 'hover:shadow-neon-lg hover:border-neon-cyan/80' : '';
+        neonEffect = 'neon-cyan';
         break;
       case 2: 
-        colorClasses = 'bg-yellow-500 border-yellow-300 shadow-lg';
-        hoverClasses = isClickable ? 'hover:shadow-yellow-500/50' : '';
+        // Player 2: Neon Magenta pieces with energy core
+        colorClasses = 'bg-gradient-radial from-neon-magenta/90 via-neon-magenta/70 to-neon-magenta/50 border-neon-magenta shadow-neon-magenta';
+        hoverClasses = isClickable ? 'hover:shadow-neon-lg hover:border-neon-magenta/80' : '';
+        neonEffect = 'neon-magenta';
         break;
       default: 
-        colorClasses = 'bg-gray-200 border-gray-400';
-        hoverClasses = isClickable ? 'hover:bg-gray-300 hover:shadow-md' : '';
+        // Empty cells: Cyberpunk grid holes with subtle glow
+        colorClasses = 'bg-gradient-radial from-cyber-metal/30 via-cyber-obsidian/50 to-cyber-space border-neon-cyan/20';
+        hoverClasses = isClickable ? 'hover:border-neon-cyan/60 hover:shadow-neon-sm hover:bg-gradient-radial hover:from-neon-cyan/10 hover:via-cyber-obsidian/60 hover:to-cyber-space' : '';
+        neonEffect = 'empty';
     }
 
-    const borderClasses = isLastMove 
-      ? 'border-4 border-blue-500 ring-2 ring-blue-300'
+    // Last move gets special victory glow effect
+    const lastMoveClasses = isLastMove 
+      ? 'ring-4 ring-success-neon/50 animate-victory-glow border-success-neon shadow-neon-xl'
       : '';
 
-    // PERFORMANCE FIX: Replace scale with shadow/opacity effects only
+    // Enhanced interaction classes with neon feedback
     const interactionClasses = isClickable 
-      ? 'cursor-pointer focus:ring-2 focus:ring-blue-400 transition-shadow duration-150 ease-out' 
+      ? 'cursor-pointer focus:ring-4 focus:ring-neon-cyan/50 hover:scale-105 active:scale-95' 
       : 'cursor-default';
 
-    return `${baseClasses} ${performanceClasses} ${colorClasses} ${borderClasses} ${interactionClasses} ${hoverClasses}`;
+    return `${baseClasses} ${performanceClasses} ${colorClasses} ${lastMoveClasses} ${interactionClasses} ${hoverClasses}`;
   }, [value, isLastMove, isClickable]);
 
   // PERFORMANCE FIX: Memoize aria-label to prevent string recalculation
@@ -90,30 +98,88 @@ const CellComponent: React.FC<OptimizedCellProps> = ({
         transform: 'translateZ(0)',
         backfaceVisibility: 'hidden',
         WebkitBackfaceVisibility: 'hidden',
-        // Optimize hover performance
-        willChange: isClickable ? 'box-shadow, background-color' : 'auto',
+        // Optimize hover performance for neon effects
+        willChange: isClickable ? 'transform, box-shadow, border-color' : 'auto',
       }}
     >
-      {/* Inner shine effect for filled cells */}
+      {/* Energy core effect for filled cells */}
       {value !== 0 && (
-        <div 
-          className="absolute top-2 left-2 w-3 h-3 bg-white/40 rounded-full blur-sm"
-          style={{
-            backfaceVisibility: 'hidden',
-            transform: 'translateZ(0)',
-          }}
-        />
+        <>
+          {/* Central energy core */}
+          <div 
+            className="absolute inset-2 rounded-full animate-neon-pulse"
+            style={{
+              background: value === 1 
+                ? 'radial-gradient(circle, rgba(0, 255, 255, 0.8) 0%, rgba(0, 255, 255, 0.3) 50%, transparent 100%)'
+                : 'radial-gradient(circle, rgba(255, 0, 255, 0.8) 0%, rgba(255, 0, 255, 0.3) 50%, transparent 100%)',
+              backfaceVisibility: 'hidden',
+              transform: 'translateZ(0)',
+            }}
+          />
+          
+          {/* Holographic shine effect */}
+          <div 
+            className="absolute top-2 left-2 w-4 h-4 rounded-full animate-hologram opacity-60"
+            style={{
+              background: `linear-gradient(45deg, 
+                rgba(255, 255, 255, 0.8) 0%, 
+                ${value === 1 ? 'rgba(0, 255, 255, 0.4)' : 'rgba(255, 0, 255, 0.4)'} 50%, 
+                transparent 100%)`,
+              backfaceVisibility: 'hidden',
+              transform: 'translateZ(0)',
+            }}
+          />
+          
+          {/* Circuit pattern overlay */}
+          <div className="absolute inset-0 opacity-20">
+            <div className="absolute top-1/4 left-1/4 w-2 h-px bg-white"></div>
+            <div className="absolute top-1/4 left-1/4 w-px h-2 bg-white"></div>
+            <div className="absolute bottom-1/4 right-1/4 w-2 h-px bg-white"></div>
+            <div className="absolute bottom-1/4 right-1/4 w-px h-2 bg-white"></div>
+          </div>
+        </>
       )}
       
-      {/* Last move indicator */}
+      {/* Empty cell grid pattern */}
+      {value === 0 && (
+        <div className="absolute inset-0 opacity-30">
+          {/* Cross pattern for empty cells */}
+          <div className="absolute top-1/2 left-2 right-2 h-px bg-neon-cyan/20 transform -translate-y-1/2"></div>
+          <div className="absolute left-1/2 top-2 bottom-2 w-px bg-neon-cyan/20 transform -translate-x-1/2"></div>
+          
+          {/* Corner dots */}
+          <div className="absolute top-2 left-2 w-1 h-1 bg-neon-cyan/30 rounded-full"></div>
+          <div className="absolute top-2 right-2 w-1 h-1 bg-neon-cyan/30 rounded-full"></div>
+          <div className="absolute bottom-2 left-2 w-1 h-1 bg-neon-cyan/30 rounded-full"></div>
+          <div className="absolute bottom-2 right-2 w-1 h-1 bg-neon-cyan/30 rounded-full"></div>
+        </div>
+      )}
+      
+      {/* Last move victory indicator */}
       {isLastMove && (
-        <div 
-          className="absolute inset-0 rounded-full animate-pulse bg-blue-400/20"
-          style={{
-            backfaceVisibility: 'hidden',
-            transform: 'translateZ(0)',
-          }}
-        />
+        <>
+          {/* Pulsing victory ring */}
+          <div 
+            className="absolute -inset-1 rounded-full animate-victory-glow border-2 border-success-neon opacity-80"
+            style={{
+              backfaceVisibility: 'hidden',
+              transform: 'translateZ(0)',
+            }}
+          />
+          
+          {/* Victory particles */}
+          <div className="absolute inset-0 pointer-events-none">
+            <div className="absolute top-0 left-1/2 w-1 h-1 bg-success-neon rounded-full animate-neon-pulse transform -translate-x-1/2 -translate-y-2"></div>
+            <div className="absolute bottom-0 left-1/2 w-1 h-1 bg-success-neon rounded-full animate-neon-pulse transform -translate-x-1/2 translate-y-2" style={{ animationDelay: '0.5s' }}></div>
+            <div className="absolute left-0 top-1/2 w-1 h-1 bg-success-neon rounded-full animate-neon-pulse transform -translate-x-2 -translate-y-1/2" style={{ animationDelay: '0.25s' }}></div>
+            <div className="absolute right-0 top-1/2 w-1 h-1 bg-success-neon rounded-full animate-neon-pulse transform translate-x-2 -translate-y-1/2" style={{ animationDelay: '0.75s' }}></div>
+          </div>
+        </>
+      )}
+      
+      {/* Hover interaction feedback */}
+      {isClickable && value === 0 && (
+        <div className="absolute inset-0 rounded-full opacity-0 hover:opacity-30 transition-opacity duration-200 bg-gradient-radial from-neon-cyan/20 to-transparent pointer-events-none"></div>
       )}
     </button>
   );
