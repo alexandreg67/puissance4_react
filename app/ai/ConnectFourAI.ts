@@ -444,23 +444,148 @@ export class ConnectFourAI {
   }
 
   private countWinningPositions(board: Board, player: number): number {
-    // Count 2-in-a-row and 3-in-a-row positions
-    return 0; // Placeholder
+    // Count 2-in-a-row and 3-in-a-row positions that can lead to wins
+    let count = 0;
+    const rows = board.length;
+    const cols = board[0].length;
+    
+    // Check all possible 4-cell windows
+    for (let r = 0; r < rows; r++) {
+      for (let c = 0; c < cols; c++) {
+        // Horizontal windows
+        if (c <= cols - 4) {
+          count += this.evaluateWindow(board, r, c, 0, 1, player);
+        }
+        // Vertical windows
+        if (r <= rows - 4) {
+          count += this.evaluateWindow(board, r, c, 1, 0, player);
+        }
+        // Diagonal (top-left to bottom-right) windows
+        if (r <= rows - 4 && c <= cols - 4) {
+          count += this.evaluateWindow(board, r, c, 1, 1, player);
+        }
+        // Diagonal (top-right to bottom-left) windows
+        if (r <= rows - 4 && c >= 3) {
+          count += this.evaluateWindow(board, r, c, 1, -1, player);
+        }
+      }
+    }
+    
+    return count;
+  }
+
+  private evaluateWindow(board: Board, row: number, col: number, deltaRow: number, deltaCol: number, player: number): number {
+    const opponent = player === 1 ? 2 : 1;
+    let playerCount = 0;
+    let opponentCount = 0;
+    let empty = 0;
+    
+    // Check 4 consecutive cells in the given direction
+    for (let i = 0; i < 4; i++) {
+      const r = row + i * deltaRow;
+      const c = col + i * deltaCol;
+      
+      if (board[r][c] === player) {
+        playerCount++;
+      } else if (board[r][c] === opponent) {
+        opponentCount++;
+      } else {
+        empty++;
+      }
+    }
+    
+    // Can't win if opponent has pieces in this window
+    if (opponentCount > 0) return 0;
+    
+    // Scoring based on player pieces in window
+    if (playerCount === 3) return 50;
+    if (playerCount === 2) return 10;
+    if (playerCount === 1) return 1;
+    
+    return 0;
   }
 
   private evaluateThreats(board: Board, player: number): number {
     // Evaluate immediate threats and forced sequences
-    return 0; // Placeholder
+    let threatScore = 0;
+    const rows = board.length;
+    const cols = board[0].length;
+    
+    for (let col = 0; col < cols; col++) {
+      const row = this.getLowestEmptyRow(board, col);
+      if (row === -1) continue;
+      
+      // Check if this move creates a threat (3 in a row with one open end)
+      if (this.createsThreat(board, row, col, player)) {
+        threatScore += 25;
+      }
+      
+      // Check if this move creates multiple threats
+      if (this.createsMultipleThreats(board, row, col, player)) {
+        threatScore += 100;
+      }
+    }
+    
+    return threatScore;
   }
 
   private evaluatePositional(board: Board, player: number): number {
     // Evaluate positional factors like control of center, height, etc.
-    return 0; // Placeholder
+    let score = 0;
+    const rows = board.length;
+    const cols = board[0].length;
+    const centerCol = Math.floor(cols / 2);
+    
+    for (let r = 0; r < rows; r++) {
+      for (let c = 0; c < cols; c++) {
+        if (board[r][c] === player) {
+          // Center columns are more valuable
+          const centerDistance = Math.abs(c - centerCol);
+          score += Math.max(0, 4 - centerDistance);
+          
+          // Lower rows are more valuable (better foundation)
+          score += (rows - r);
+        }
+      }
+    }
+    
+    return score;
   }
 
   private evaluateConnectivity(board: Board, player: number): number {
     // Evaluate piece connectivity and potential
-    return 0; // Placeholder
+    let connectivityScore = 0;
+    const rows = board.length;
+    const cols = board[0].length;
+    
+    for (let r = 0; r < rows; r++) {
+      for (let c = 0; c < cols; c++) {
+        if (board[r][c] === player) {
+          // Count adjacent same-color pieces
+          let adjacentPieces = 0;
+          const directions = [
+            [-1, -1], [-1, 0], [-1, 1],
+            [0, -1],           [0, 1],
+            [1, -1],  [1, 0],  [1, 1]
+          ];
+          
+          for (const [dr, dc] of directions) {
+            const newR = r + dr;
+            const newC = c + dc;
+            
+            if (newR >= 0 && newR < rows && newC >= 0 && newC < cols) {
+              if (board[newR][newC] === player) {
+                adjacentPieces++;
+              }
+            }
+          }
+          
+          connectivityScore += adjacentPieces;
+        }
+      }
+    }
+    
+    return connectivityScore;
   }
 
   private orderMoves(validColumns: number[], board: Board): number[] {
@@ -478,5 +603,81 @@ export class ConnectFourAI {
       return centerCol;
     }
     return -1; // No opening book move
+  }
+
+  private createsThreat(board: Board, row: number, col: number, player: number): boolean {
+    // Temporarily place the piece
+    const newBoard = this.makeMove(board, row, col, player);
+    
+    // Check if this creates 3-in-a-row with one open end
+    const directions = [
+      [0, 1],   // horizontal
+      [1, 0],   // vertical
+      [1, 1],   // diagonal \
+      [1, -1]   // diagonal /
+    ];
+    
+    for (const [dr, dc] of directions) {
+      if (this.hasThreeInRowWithOpenEnd(newBoard, row, col, dr, dc, player)) {
+        return true;
+      }
+    }
+    
+    return false;
+  }
+
+  private createsMultipleThreats(board: Board, row: number, col: number, player: number): boolean {
+    // Temporarily place the piece
+    const newBoard = this.makeMove(board, row, col, player);
+    
+    let threatCount = 0;
+    const directions = [
+      [0, 1],   // horizontal
+      [1, 0],   // vertical  
+      [1, 1],   // diagonal \
+      [1, -1]   // diagonal /
+    ];
+    
+    for (const [dr, dc] of directions) {
+      if (this.hasThreeInRowWithOpenEnd(newBoard, row, col, dr, dc, player)) {
+        threatCount++;
+      }
+    }
+    
+    return threatCount >= 2;
+  }
+
+  private hasThreeInRowWithOpenEnd(board: Board, row: number, col: number, deltaRow: number, deltaCol: number, player: number): boolean {
+    const rows = board.length;
+    const cols = board[0].length;
+    
+    // Count consecutive pieces in both directions
+    let count = 1; // Count the placed piece
+    
+    // Count in positive direction
+    for (let i = 1; i < 4; i++) {
+      const r = row + i * deltaRow;
+      const c = col + i * deltaCol;
+      
+      if (r >= 0 && r < rows && c >= 0 && c < cols && board[r][c] === player) {
+        count++;
+      } else {
+        break;
+      }
+    }
+    
+    // Count in negative direction
+    for (let i = 1; i < 4; i++) {
+      const r = row - i * deltaRow;
+      const c = col - i * deltaCol;
+      
+      if (r >= 0 && r < rows && c >= 0 && c < cols && board[r][c] === player) {
+        count++;
+      } else {
+        break;
+      }
+    }
+    
+    return count >= 3;
   }
 }

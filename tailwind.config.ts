@@ -1,4 +1,5 @@
 import type { Config } from "tailwindcss";
+import type { PluginAPI } from "tailwindcss/types/config";
 import { designTokens } from "./app/design-system/tokens";
 
 const config: Config = {
@@ -227,9 +228,9 @@ const config: Config = {
     },
   },
   plugins: [
-    // Plugin to add text-shadow utilities
-    function({ addUtilities }: { addUtilities: any }) {
-      const textShadowUtilities = {
+    // Plugin to add text-shadow utilities with proper TypeScript typing
+    function({ addUtilities }: PluginAPI) {
+      const textShadowUtilities: Record<string, { textShadow: string }> = {
         '.text-shadow-neon-sm': {
           textShadow: '0 0 5px currentColor'
         },

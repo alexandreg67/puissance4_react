@@ -5,6 +5,36 @@
 
 import { useEffect, useState } from 'react';
 
+// Helper function to check if window is available (SSR safety)
+export const isWindowAvailable = (): boolean => {
+  return typeof window !== 'undefined';
+};
+
+// Helper function to get window dimensions safely
+export const getWindowDimensions = () => {
+  if (!isWindowAvailable()) {
+    return { width: 0, height: 0 };
+  }
+  return {
+    width: window.innerWidth,
+    height: window.innerHeight,
+  };
+};
+
+// Helper function to determine screen size category based on width
+export const getScreenSize = (width: number): 'ultra-small' | 'small-mobile' | 'mobile' | 'tablet' | 'desktop' => {
+  if (width < RESPONSIVE_THRESHOLDS.ULTRA_SMALL_WIDTH) return 'ultra-small';
+  if (width < RESPONSIVE_THRESHOLDS.SMALL_MOBILE_WIDTH) return 'small-mobile';
+  if (width < RESPONSIVE_THRESHOLDS.MOBILE_BOUNDARY) return 'mobile';
+  if (width < RESPONSIVE_THRESHOLDS.TABLET_BOUNDARY) return 'tablet';
+  return 'desktop';
+};
+
+// Helper function to check if device needs reduced effects
+export const shouldReduceEffects = (deviceType: string, width: number): boolean => {
+  return deviceType === 'mobile' && width < RESPONSIVE_THRESHOLDS.SMALL_MOBILE_WIDTH;
+};
+
 // Breakpoint definitions matching Tailwind CSS
 export const breakpoints = {
   xs: 0,
@@ -15,33 +45,35 @@ export const breakpoints = {
   '2xl': 1536,
 } as const;
 
+// Magic numbers extracted as constants for maintainability
+export const RESPONSIVE_THRESHOLDS = {
+  ULTRA_SMALL_WIDTH: 375,
+  SMALL_MOBILE_WIDTH: 428,
+  MOBILE_BOUNDARY: breakpoints.md,
+  TABLET_BOUNDARY: breakpoints.lg,
+} as const;
+
 export type Breakpoint = keyof typeof breakpoints;
 
 // Device type detection
 export const getDeviceType = (width: number): 'mobile' | 'tablet' | 'desktop' => {
-  if (width < breakpoints.md) return 'mobile';
-  if (width < breakpoints.lg) return 'tablet';
+  if (width < RESPONSIVE_THRESHOLDS.MOBILE_BOUNDARY) return 'mobile';
+  if (width < RESPONSIVE_THRESHOLDS.TABLET_BOUNDARY) return 'tablet';
   return 'desktop';
 };
 
 // Custom hook for responsive behavior
 export const useResponsive = () => {
-  const [windowSize, setWindowSize] = useState({
-    width: typeof window !== 'undefined' ? window.innerWidth : 0,
-    height: typeof window !== 'undefined' ? window.innerHeight : 0,
-  });
-
+  const [windowSize, setWindowSize] = useState(getWindowDimensions);
   const [deviceType, setDeviceType] = useState<'mobile' | 'tablet' | 'desktop'>('desktop');
 
   useEffect(() => {
-    if (typeof window === 'undefined') return;
+    if (!isWindowAvailable()) return;
 
     const handleResize = () => {
-      const width = window.innerWidth;
-      const height = window.innerHeight;
-      
-      setWindowSize({ width, height });
-      setDeviceType(getDeviceType(width));
+      const dimensions = getWindowDimensions();
+      setWindowSize(dimensions);
+      setDeviceType(getDeviceType(dimensions.width));
     };
 
     // Set initial values
@@ -66,7 +98,7 @@ export const getGridConfig = (deviceType: 'mobile' | 'tablet' | 'desktop', windo
   switch (deviceType) {
     case 'mobile':
       // Extra small screens (< 375px) - ultra compact to prevent overlap
-      if (windowWidth && windowWidth < 375) {
+      if (windowWidth && windowWidth < RESPONSIVE_THRESHOLDS.ULTRA_SMALL_WIDTH) {
         // Available width ≈ 320px - padding = ~300px
         // 7 cells × 20px + 6 gaps × 6px = 140px + 36px = 176px (plenty of space)
         return {
@@ -78,7 +110,7 @@ export const getGridConfig = (deviceType: 'mobile' | 'tablet' | 'desktop', windo
         };
       }
       // Very small screens (375px - 428px) - iPhone size optimization
-      if (windowWidth && windowWidth < 428) {
+      if (windowWidth && windowWidth < RESPONSIVE_THRESHOLDS.SMALL_MOBILE_WIDTH) {
         // Available width ≈ 375px - padding = ~350px
         // 7 cells × 24px + 6 gaps × 8px = 168px + 48px = 216px (comfortable fit)
         return {
@@ -158,7 +190,7 @@ export const getTextConfig = (deviceType: 'mobile' | 'tablet' | 'desktop', windo
   switch (deviceType) {
     case 'mobile':
       // Extra small screens need even smaller text
-      if (windowWidth && windowWidth < 375) {
+      if (windowWidth && windowWidth < RESPONSIVE_THRESHOLDS.ULTRA_SMALL_WIDTH) {
         return {
           title: 'text-2xl xs:text-3xl sm:text-4xl',
           subtitle: 'text-base xs:text-lg sm:text-xl',
@@ -199,7 +231,7 @@ export const getSpacingConfig = (deviceType: 'mobile' | 'tablet' | 'desktop', wi
   switch (deviceType) {
     case 'mobile':
       // Extra small screens need minimal spacing
-      if (windowWidth && windowWidth < 375) {
+      if (windowWidth && windowWidth < RESPONSIVE_THRESHOLDS.ULTRA_SMALL_WIDTH) {
         return {
           containerPadding: 'px-2 py-2 xs:px-4 xs:py-4',
           sectionSpacing: 'space-y-2 xs:space-y-3 sm:space-y-4',

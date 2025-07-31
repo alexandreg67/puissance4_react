@@ -60,7 +60,7 @@ const ScoreBoardComponent: React.FC<ScoreBoardProps> = ({ scores, gameMode }) =>
 				</div>
 			</div>
 		</div>
-	), [scores, spacingConfig, textConfig]);
+	), [scores, spacingConfig.cardPadding, textConfig.body, textConfig.subtitle]);
 
 	const player2Display = useMemo(() => {
 		const isIA = gameMode === 'Player vs IA';
@@ -70,7 +70,7 @@ const ScoreBoardComponent: React.FC<ScoreBoardProps> = ({ scores, gameMode }) =>
 			: <UserGroupIcon className="h-8 w-8 text-neon-magenta animate-neon-pulse" />;
 		
 		return (
-			<div className="hud-panel text-neon-magenta border-neon-magenta rounded-xl p-6 backdrop-blur-lg group hover:shadow-neon-md transition-all duration-300">
+			<div className={`hud-panel text-neon-magenta border-neon-magenta rounded-xl ${spacingConfig.cardPadding} backdrop-blur-lg group hover:shadow-neon-md transition-all duration-300`}>
 				<div className="flex flex-col items-center space-y-4">
 					{/* Player 2 Header */}
 					<div className="flex items-center space-x-3">
@@ -79,7 +79,7 @@ const ScoreBoardComponent: React.FC<ScoreBoardProps> = ({ scores, gameMode }) =>
 							<div className="text-xs font-mono tracking-widest opacity-80">
 								{isIA ? 'ARTIFICIAL' : 'PLAYER'}
 							</div>
-							<div className="text-lg font-display font-bold text-shadow-neon-sm">
+							<div className={`${textConfig.body} font-display font-bold text-shadow-neon-sm`}>
 								{isIA ? 'INTELLIGENCE' : 'TWO'}
 							</div>
 						</div>
@@ -129,7 +129,7 @@ const ScoreBoardComponent: React.FC<ScoreBoardProps> = ({ scores, gameMode }) =>
 				</div>
 			</div>
 		);
-	}, [gameMode, scores, spacingConfig, textConfig]);
+	}, [gameMode, scores, spacingConfig.cardPadding, textConfig.body, textConfig.subtitle]);
 
 	return (
 		<div className={`${layoutConfig.scoreboardLayout} justify-center items-center w-full ${spacingConfig.containerPadding}`}>
