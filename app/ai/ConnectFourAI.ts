@@ -12,6 +12,16 @@ import { Board, CellValue, Position } from '../types/game';
 
 export type AIDifficulty = 'easy' | 'medium' | 'hard' | 'expert';
 
+// Game constants for better maintainability
+export const CONNECT_FOUR_CONSTANTS = {
+  WIN_LENGTH: 4,              // Number of pieces needed to win
+  THREE_IN_A_ROW: 3,          // Threat detection threshold
+  TWO_IN_A_ROW: 2,            // Pattern recognition threshold
+  MAX_SEARCH_DISTANCE: 3,     // Maximum distance to search for patterns
+  WIN_SCORE: 10000,           // Score for winning positions
+  THREAT_SCORE: 100,          // Score for creating threats
+} as const;
+
 export interface AIGameState {
   board: Board;
   rows: number;
@@ -84,7 +94,7 @@ export class ConnectFourAI {
       for (const col of validColumns) {
         const row = this.getLowestEmptyRow(board, col);
         if (row !== -1 && this.isWinningMove(board, row, col, 2)) {
-          return { column: col, evaluation: 1000, depth: 1 };
+          return { column: col, evaluation: CONNECT_FOUR_CONSTANTS.WIN_SCORE / 10, depth: 1 };
         }
       }
     }
@@ -221,7 +231,7 @@ export class ConnectFourAI {
       
       // Check for immediate win
       if (this.isWinningMove(board, row, col, isMaximizing ? 2 : 1)) {
-        const winValue = isMaximizing ? 10000 + depth : -10000 - depth;
+        const winValue = isMaximizing ? CONNECT_FOUR_CONSTANTS.WIN_SCORE + depth : -CONNECT_FOUR_CONSTANTS.WIN_SCORE - depth;
         return { evaluation: winValue, bestColumn: col, pv: [col] };
       }
 
@@ -269,8 +279,8 @@ export class ConnectFourAI {
     const opponent = player === 1 ? 2 : 1;
     
     // Check for wins
-    if (this.hasWon(board, player)) return 1000 - depth;
-    if (this.hasWon(board, opponent)) return -1000 + depth;
+    if (this.hasWon(board, player)) return CONNECT_FOUR_CONSTANTS.WIN_SCORE / 10 - depth;
+    if (this.hasWon(board, opponent)) return -CONNECT_FOUR_CONSTANTS.WIN_SCORE / 10 + depth;
     
     let score = 0;
     
@@ -295,8 +305,8 @@ export class ConnectFourAI {
     let score = 0;
     
     // Check for wins
-    if (this.hasWon(board, 2)) return 10000;
-    if (this.hasWon(board, 1)) return -10000;
+    if (this.hasWon(board, 2)) return CONNECT_FOUR_CONSTANTS.WIN_SCORE;
+    if (this.hasWon(board, 1)) return -CONNECT_FOUR_CONSTANTS.WIN_SCORE;
     
     // Threat analysis
     score += this.evaluateThreats(board, 2) * 10;
@@ -387,7 +397,7 @@ export class ConnectFourAI {
     
     // Horizontal
     for (let r = 0; r < rows; r++) {
-      for (let c = 0; c <= cols - 4; c++) {
+      for (let c = 0; c <= cols - CONNECT_FOUR_CONSTANTS.WIN_LENGTH; c++) {
         if (board[r][c] === player && 
             board[r][c + 1] === player && 
             board[r][c + 2] === player && 
@@ -398,7 +408,7 @@ export class ConnectFourAI {
     }
     
     // Vertical
-    for (let r = 0; r <= rows - 4; r++) {
+    for (let r = 0; r <= rows - CONNECT_FOUR_CONSTANTS.WIN_LENGTH; r++) {
       for (let c = 0; c < cols; c++) {
         if (board[r][c] === player && 
             board[r + 1][c] === player && 
@@ -410,8 +420,8 @@ export class ConnectFourAI {
     }
     
     // Diagonal (top-left to bottom-right)
-    for (let r = 0; r <= rows - 4; r++) {
-      for (let c = 0; c <= cols - 4; c++) {
+    for (let r = 0; r <= rows - CONNECT_FOUR_CONSTANTS.WIN_LENGTH; r++) {
+      for (let c = 0; c <= cols - CONNECT_FOUR_CONSTANTS.WIN_LENGTH; c++) {
         if (board[r][c] === player && 
             board[r + 1][c + 1] === player && 
             board[r + 2][c + 2] === player && 
@@ -422,8 +432,8 @@ export class ConnectFourAI {
     }
     
     // Diagonal (top-right to bottom-left)
-    for (let r = 0; r <= rows - 4; r++) {
-      for (let c = 3; c < cols; c++) {
+    for (let r = 0; r <= rows - CONNECT_FOUR_CONSTANTS.WIN_LENGTH; r++) {
+      for (let c = CONNECT_FOUR_CONSTANTS.WIN_LENGTH - 1; c < cols; c++) {
         if (board[r][c] === player && 
             board[r + 1][c - 1] === player && 
             board[r + 2][c - 2] === player && 
@@ -481,7 +491,7 @@ export class ConnectFourAI {
     let empty = 0;
     
     // Check 4 consecutive cells in the given direction
-    for (let i = 0; i < 4; i++) {
+    for (let i = 0; i < CONNECT_FOUR_CONSTANTS.WIN_LENGTH; i++) {
       const r = row + i * deltaRow;
       const c = col + i * deltaCol;
       
@@ -498,8 +508,8 @@ export class ConnectFourAI {
     if (opponentCount > 0) return 0;
     
     // Scoring based on player pieces in window
-    if (playerCount === 3) return 50;
-    if (playerCount === 2) return 10;
+    if (playerCount === CONNECT_FOUR_CONSTANTS.THREE_IN_A_ROW) return 50;
+    if (playerCount === CONNECT_FOUR_CONSTANTS.TWO_IN_A_ROW) return 10;
     if (playerCount === 1) return 1;
     
     return 0;
@@ -522,7 +532,7 @@ export class ConnectFourAI {
       
       // Check if this move creates multiple threats
       if (this.createsMultipleThreats(board, row, col, player)) {
-        threatScore += 100;
+        threatScore += CONNECT_FOUR_CONSTANTS.THREAT_SCORE;
       }
     }
     
@@ -644,7 +654,7 @@ export class ConnectFourAI {
       }
     }
     
-    return threatCount >= 2;
+    return threatCount >= CONNECT_FOUR_CONSTANTS.TWO_IN_A_ROW;
   }
 
   private hasThreeInRowWithOpenEnd(board: Board, row: number, col: number, deltaRow: number, deltaCol: number, player: number): boolean {
@@ -655,7 +665,7 @@ export class ConnectFourAI {
     let count = 1; // Count the placed piece
     
     // Count in positive direction
-    for (let i = 1; i < 4; i++) {
+    for (let i = 1; i < CONNECT_FOUR_CONSTANTS.MAX_SEARCH_DISTANCE + 1; i++) {
       const r = row + i * deltaRow;
       const c = col + i * deltaCol;
       
@@ -667,7 +677,7 @@ export class ConnectFourAI {
     }
     
     // Count in negative direction
-    for (let i = 1; i < 4; i++) {
+    for (let i = 1; i < CONNECT_FOUR_CONSTANTS.MAX_SEARCH_DISTANCE + 1; i++) {
       const r = row - i * deltaRow;
       const c = col - i * deltaCol;
       
@@ -678,6 +688,6 @@ export class ConnectFourAI {
       }
     }
     
-    return count >= 3;
+    return count >= CONNECT_FOUR_CONSTANTS.THREE_IN_A_ROW;
   }
 }

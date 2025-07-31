@@ -83,6 +83,30 @@ const CellComponent: React.FC<OptimizedCellProps> = ({
     return `Cell ${cellState}${lastMoveIndicator}`;
   }, [value, isLastMove]);
 
+  // PERFORMANCE FIX: Memoize style object to prevent recreation on every render
+  const buttonStyle = useMemo(() => {
+    const baseStyle = {
+      // CRITICAL GPU ACCELERATION: Force hardware layer creation
+      transform: 'translateZ(0)',
+      backfaceVisibility: 'hidden' as const,
+      WebkitBackfaceVisibility: 'hidden' as const,
+      // Optimize hover performance for neon effects
+      willChange: isClickable ? 'transform, box-shadow, border-color' as const : 'auto' as const,
+    };
+
+    // Add mobile-specific styles conditionally
+    if (deviceType === 'mobile') {
+      return {
+        ...baseStyle,
+        boxSizing: 'border-box' as const,
+        maxWidth: '100%',
+        flexShrink: 0
+      };
+    }
+
+    return baseStyle;
+  }, [isClickable, deviceType]);
+
   // PERFORMANCE FIX: Memoize click handler
   const handleClick = useCallback(() => {
     if (isClickable && onClick) {
@@ -107,20 +131,7 @@ const CellComponent: React.FC<OptimizedCellProps> = ({
       data-testid={testId}
       aria-label={ariaLabel}
       tabIndex={isClickable ? 0 : -1}
-      style={{
-        // CRITICAL GPU ACCELERATION: Force hardware layer creation
-        transform: 'translateZ(0)',
-        backfaceVisibility: 'hidden',
-        WebkitBackfaceVisibility: 'hidden',
-        // Optimize hover performance for neon effects
-        willChange: isClickable ? 'transform, box-shadow, border-color' : 'auto',
-        // Prevent overflow on mobile
-        ...(deviceType === 'mobile' && {
-          boxSizing: 'border-box',
-          maxWidth: '100%',
-          flexShrink: 0
-        })
-      }}
+      style={buttonStyle}
     >
       {/* Energy core effect for filled cells */}
       {value !== 0 && (
