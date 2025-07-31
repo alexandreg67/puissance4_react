@@ -128,19 +128,39 @@ const GridComponent: React.FC<OptimizedGridProps> = ({
       </div>
       
       {/* Futuristic Column Indicators */}
-      <div className={`flex ${gridConfig.gap} justify-center w-full max-w-full overflow-hidden`}>
+      <div 
+        className={`grid grid-cols-7 ${gridConfig.gap} ${gridConfig.gridPadding} w-full max-w-full`}
+        style={{
+          maxWidth: deviceType === 'mobile' ? 'calc(100vw - 16px)' : 'none',
+          width: 'fit-content',
+          margin: '0 auto'
+        }}
+      >
         {Array.from({ length: 7 }, (_, index) => (
           <div
             key={index}
             className="flex flex-col items-center space-y-2 group"
+            style={{ width: 'fit-content', margin: '0 auto' }}
           >
-            {/* Column number with neon styling */}
-            <div className="hud-panel text-neon-cyan border-neon-cyan px-3 py-1 rounded-full text-xs font-mono font-bold tracking-wider opacity-60 group-hover:opacity-100 transition-opacity">
-              COL_{index + 1}
+            {/* Column number with neon styling - responsive sizing */}
+            <div className={`hud-panel text-neon-cyan border-neon-cyan rounded-full font-mono font-bold tracking-wider opacity-60 group-hover:opacity-100 transition-opacity ${
+              deviceType === 'mobile' 
+                ? windowSize.width < 375 
+                  ? 'px-1 py-0.5 text-xs' 
+                  : 'px-2 py-1 text-xs'
+                : 'px-3 py-1 text-xs'
+            }`}>
+              {index + 1}
             </div>
             
-            {/* Drop zone indicator */}
-            <div className="w-4 h-1 bg-gradient-to-r from-transparent via-neon-cyan/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity animate-neon-pulse"></div>
+            {/* Drop zone indicator - matched to cell size */}
+            <div className={`bg-gradient-to-r from-transparent via-neon-cyan/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity animate-neon-pulse h-1 ${
+              deviceType === 'mobile' 
+                ? windowSize.width < 375 
+                  ? 'w-4' 
+                  : 'w-6'
+                : 'w-8'
+            }`}></div>
           </div>
         ))}
       </div>

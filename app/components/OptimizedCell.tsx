@@ -27,7 +27,8 @@ const CellComponent: React.FC<OptimizedCellProps> = ({
 
   // PERFORMANCE FIX: Memoize expensive style calculations with cyberpunk theme
   const cellStyles = useMemo(() => {
-    const baseClasses = `relative ${gridConfig.cellSize} rounded-full border-2 focus:outline-none overflow-hidden ${interactionConfig.tapTargetSize}`;
+    const borderClass = deviceType === 'mobile' && windowSize.width < 428 ? 'border' : 'border-2';
+    const baseClasses = `relative ${gridConfig.cellSize} rounded-full ${borderClass} focus:outline-none overflow-hidden ${interactionConfig.tapTargetSize}`;
     
     // GPU ACCELERATION FIX: Enhanced hardware acceleration for neon effects
     const performanceClasses = `transform-gpu will-change-transform backface-visibility-hidden transition-all ${animationConfig.transitionDuration} ease-out`;
@@ -66,11 +67,11 @@ const CellComponent: React.FC<OptimizedCellProps> = ({
       ? `cursor-pointer ${interactionConfig.focusRing} ${interactionConfig.hoverEffects ? 'hover:scale-105' : ''} ${interactionConfig.touchFeedback ? 'active:scale-95' : ''}` 
       : 'cursor-default';
 
-    // Prevent overflow on mobile with box constraints
-    const containerClasses = deviceType === 'mobile' ? 'max-w-full flex-shrink-0' : '';
+    // Prevent overflow on mobile with box constraints and border-box sizing
+    const containerClasses = deviceType === 'mobile' ? 'max-w-full flex-shrink-0 box-border' : 'box-border';
 
     return `${baseClasses} ${performanceClasses} ${colorClasses} ${lastMoveClasses} ${interactionClasses} ${hoverClasses} ${containerClasses}`;
-  }, [value, isLastMove, isClickable, gridConfig, animationConfig, interactionConfig, deviceType]);
+  }, [value, isLastMove, isClickable, gridConfig, animationConfig, interactionConfig, deviceType, windowSize.width]);
 
   // PERFORMANCE FIX: Memoize aria-label to prevent string recalculation
   const ariaLabel = useMemo(() => {
