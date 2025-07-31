@@ -1,6 +1,6 @@
 /**
  * AI Manager - Orchestrates different AI difficulty levels
- * 
+ *
  * This manager:
  * - Handles AI difficulty switching
  * - Provides backward compatibility with existing IAGameState interface
@@ -8,8 +8,8 @@
  * - Coordinates between old and new AI systems
  */
 
-import { Board, AIDifficulty, AISettings } from '../types/game';
-import { ConnectFourAI, AIGameState } from './ConnectFourAI';
+import { Board, AIDifficulty, AISettings } from "../types/game";
+import { ConnectFourAI, AIGameState } from "./ConnectFourAI";
 
 export interface AIManagerConfig {
   difficulty: AIDifficulty;
@@ -34,11 +34,13 @@ export class AIManager {
   private config: AIManagerConfig;
   private thinkingStartTime = 0;
 
-  constructor(config: AIManagerConfig = {
-    difficulty: 'medium',
-    showThinking: true,
-    adaptiveTime: true
-  }) {
+  constructor(
+    config: AIManagerConfig = {
+      difficulty: "medium",
+      showThinking: true,
+      adaptiveTime: true,
+    }
+  ) {
     this.config = config;
     this.currentAI = new ConnectFourAI(config.difficulty);
   }
@@ -49,20 +51,56 @@ export class AIManager {
   public async getBestMove(board: Board): Promise<AIResult> {
     this.thinkingStartTime = Date.now();
 
-    // Convert board format for AI
+    // Add input validation
+    if (!board || board.length === 0 || board[0].length === 0) {
+      throw new Error("Invalid board state provided to AI");
+    }
+
+    // Validate board dimensions
+    if (board.length !== 6 || board[0].length !== 7) {
+      throw new Error(
+        `Invalid board dimensions: ${board.length}x${board[0].length}. Expected 6x7.`
+      );
+    }
+
+    // Validate board content
+    for (let row = 0; row < board.length; row++) {
+      for (let col = 0; col < board[row].length; col++) {
+        const cell = board[row][col];
+        if (cell !== 0 && cell !== 1 && cell !== 2) {
+          throw new Error(
+            `Invalid cell value ${cell} at position [${row}, ${col}]. Expected 0, 1, or 2.`
+          );
+        }
+      }
+    }
+
     const gameState: AIGameState = {
       board,
       rows: board.length,
-      cols: board[0].length
+      cols: board[0].length,
     };
 
     try {
-      // Get move from current AI
       const aiMove = this.currentAI.getBestMove(gameState);
-      const thinkingTime = Date.now() - this.thinkingStartTime;
 
-      // Add minimum thinking time for UX (except for easy mode)
+      // Validate AI response
+      if (aiMove.column < 0 || aiMove.column >= board[0].length) {
+        throw new Error(
+          `AI returned invalid column: ${
+            aiMove.column
+          }. Must be between 0 and ${board[0].length - 1}.`
+        );
+      }
+
+      // Check if the column is actually playable
+      if (board[0][aiMove.column] !== 0) {
+        throw new Error(`AI returned full column: ${aiMove.column}`);
+      }
+
+      const thinkingTime = Date.now() - this.thinkingStartTime;
       const minThinkingTime = this.getMinThinkingTime();
+
       if (thinkingTime < minThinkingTime) {
         await this.delay(minThinkingTime - thinkingTime);
       }
@@ -72,21 +110,25 @@ export class AIManager {
         evaluation: aiMove.evaluation,
         depth: aiMove.depth,
         thinkingTime: Date.now() - this.thinkingStartTime,
-        principalVariation: aiMove.pv
+        principalVariation: aiMove.pv,
       };
-
     } catch (error) {
-      console.error('AI Error:', error);
-      
-      // Fallback to random valid move
+      console.error("AI Error:", error);
+
+      // Enhanced fallback with validation
       const validColumns = this.getValidColumns(board);
-      const randomColumn = validColumns[Math.floor(Math.random() * validColumns.length)];
-      
+      if (validColumns.length === 0) {
+        throw new Error("No valid moves available - game should have ended");
+      }
+
+      const randomColumn =
+        validColumns[Math.floor(Math.random() * validColumns.length)];
+
       return {
         column: randomColumn,
         evaluation: 0,
         depth: 0,
-        thinkingTime: Date.now() - this.thinkingStartTime
+        thinkingTime: Date.now() - this.thinkingStartTime,
       };
     }
   }
@@ -100,8 +142,8 @@ export class AIManager {
     nbColonne: number;
   }): Promise<number> {
     // Convert legacy format to new format
-    const board: Board = iaGameState.grid.map(row => 
-      row.map(cell => cell as 0 | 1 | 2)
+    const board: Board = iaGameState.grid.map((row) =>
+      row.map((cell) => cell as 0 | 1 | 2)
     );
 
     const result = await this.getBestMove(board);
@@ -136,31 +178,38 @@ export class AIManager {
   } {
     const configs = {
       easy: {
-        description: 'Casual play with occasional mistakes',
+        description: "Casual play with occasional mistakes",
         maxDepth: 1,
-        estimatedStrength: 3
+        estimatedStrength: 3,
       },
       medium: {
-        description: 'Balanced play with tactical awareness',
+        description: "Balanced play with tactical awareness",
         maxDepth: 3,
-        estimatedStrength: 6
+        estimatedStrength: 6,
       },
       hard: {
-        description: 'Strong tactical play with deep calculation',
+        description: "Strong tactical play with deep calculation",
         maxDepth: 5,
-        estimatedStrength: 8
+        estimatedStrength: 8,
       },
       expert: {
-        description: 'Near-perfect play with advanced strategy',
+        description: "Near-perfect play with advanced strategy",
         maxDepth: 7,
-        estimatedStrength: 10
-      }
+        estimatedStrength: 10,
+      },
     };
 
     return {
       difficulty: this.config.difficulty,
-      ...configs[this.config.difficulty]
+      ...configs[this.config.difficulty],
     };
+  }
+
+  /**
+   * Clear AI cache to prevent memory leaks
+   */
+  public clearCache(): void {
+    this.currentAI.clearCache();
   }
 
   /**
@@ -174,29 +223,29 @@ export class AIManager {
   } {
     const difficultyMap = {
       easy: {
-        name: 'Facile',
-        icon: '🟢',
-        color: 'text-green-600 bg-green-100',
-        description: 'Parfait pour débuter, l\'IA fait quelques erreurs'
+        name: "Facile",
+        icon: "🟢",
+        color: "text-green-600 bg-green-100",
+        description: "Parfait pour débuter, l'IA fait quelques erreurs",
       },
       medium: {
-        name: 'Moyen',
-        icon: '🟡',
-        color: 'text-yellow-600 bg-yellow-100',
-        description: 'Un bon challenge avec une tactique équilibrée'
+        name: "Moyen",
+        icon: "🟡",
+        color: "text-yellow-600 bg-yellow-100",
+        description: "Un bon challenge avec une tactique équilibrée",
       },
       hard: {
-        name: 'Difficile',
-        icon: '🔴',
-        color: 'text-red-600 bg-red-100',
-        description: 'IA forte avec analyse profonde des positions'
+        name: "Difficile",
+        icon: "🔴",
+        color: "text-red-600 bg-red-100",
+        description: "IA forte avec analyse profonde des positions",
       },
       expert: {
-        name: 'Expert',
-        icon: '⚡',
-        color: 'text-purple-600 bg-purple-100',
-        description: 'Quasi-parfait, pour les joueurs expérimentés'
-      }
+        name: "Expert",
+        icon: "⚡",
+        color: "text-purple-600 bg-purple-100",
+        description: "Quasi-parfait, pour les joueurs expérimentés",
+      },
     };
 
     return difficultyMap[difficulty];
@@ -220,10 +269,10 @@ export class AIManager {
    */
   private getMinThinkingTime(): number {
     const timings = {
-      easy: 300,    // Quick moves
-      medium: 800,  // Moderate thinking
-      hard: 1500,   // Deep thinking
-      expert: 2500  // Very deep thinking
+      easy: 300, // Quick moves
+      medium: 800, // Moderate thinking
+      hard: 1500, // Deep thinking
+      expert: 2500, // Very deep thinking
     };
 
     return timings[this.config.difficulty];
@@ -233,7 +282,7 @@ export class AIManager {
    * Utility delay function
    */
   private delay(ms: number): Promise<void> {
-    return new Promise(resolve => setTimeout(resolve, ms));
+    return new Promise((resolve) => setTimeout(resolve, ms));
   }
 
   /**
@@ -241,7 +290,7 @@ export class AIManager {
    */
   public updateConfig(newConfig: Partial<AIManagerConfig>): void {
     this.config = { ...this.config, ...newConfig };
-    
+
     if (newConfig.difficulty) {
       this.currentAI = new ConnectFourAI(newConfig.difficulty);
     }
@@ -260,7 +309,7 @@ export class AIManager {
     return {
       difficulty: this.config.difficulty,
       avgThinkingTime: this.getMinThinkingTime(),
-      totalMoves: 0
+      totalMoves: 0,
     };
   }
 }

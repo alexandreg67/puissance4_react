@@ -1,8 +1,10 @@
+import React from "react";
+
 // Core game types
 export type Player = 1 | 2;
 export type CellValue = 0 | Player;
-export type GameState = 'playing' | 'won' | 'draw';
-export type GameMode = 'Player vs Player' | 'Player vs IA';
+export type GameState = "playing" | "won" | "draw";
+export type GameMode = "Player vs Player" | "Player vs IA";
 
 // Board and grid types
 export type Board = CellValue[][];
@@ -10,8 +12,8 @@ export type Position = { row: number; col: number };
 
 // Game statistics
 export interface GameScore {
-  'Player 1': number;
-  'Player 2': number;
+  "Player 1": number;
+  "Player 2": number;
 }
 
 // Component prop types
@@ -20,7 +22,7 @@ export interface CellProps {
   isClickable?: boolean;
   isLastMove?: boolean;
   onClick?: () => void;
-  'data-testid'?: string;
+  "data-testid"?: string;
 }
 
 export interface GridProps {
@@ -32,7 +34,7 @@ export interface GridProps {
 export interface GameControlsProps {
   winner: string | null;
   resetGame: () => void;
-  setGameMode: (mode: GameMode | null) => void;
+  setGameMode: React.Dispatch<React.SetStateAction<GameMode | null>>;
 }
 
 export interface ScoreBoardProps {
@@ -47,7 +49,7 @@ export interface IAGameState {
   nbColonne: number;
 }
 
-export type AIDifficulty = 'easy' | 'medium' | 'hard' | 'expert';
+export type AIDifficulty = "easy" | "medium" | "hard" | "expert";
 
 export interface AIMove {
   column: number;
@@ -58,10 +60,10 @@ export interface AIMove {
 }
 
 export enum DifficultyLevel {
-  EASY = 'easy',
-  MEDIUM = 'medium',
-  HARD = 'hard',
-  EXPERT = 'expert'
+  EASY = "easy",
+  MEDIUM = "medium",
+  HARD = "hard",
+  EXPERT = "expert",
 }
 
 export interface AISettings {
@@ -72,7 +74,7 @@ export interface AISettings {
 
 // Error types
 export interface GameError {
-  type: 'INVALID_MOVE' | 'GAME_ENDED' | 'COLUMN_FULL' | 'AI_ERROR';
+  type: "INVALID_MOVE" | "GAME_ENDED" | "COLUMN_FULL" | "AI_ERROR";
   message: string;
   columnIndex?: number;
 }
@@ -94,5 +96,5 @@ export const DEFAULT_GAME_CONFIG: GameConfig = {
   rows: GRID_ROWS,
   cols: GRID_COLS,
   winCondition: WIN_CONDITION,
-  aiDelay: 500
+  aiDelay: 500,
 };

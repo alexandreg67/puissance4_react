@@ -1,6 +1,6 @@
 /**
  * Advanced Connect 4 AI System with Multiple Difficulty Levels
- * 
+ *
  * Features:
  * - Easy: Heuristic with intentional mistakes
  * - Medium: 2-ply lookahead with enhanced patterns
@@ -8,14 +8,12 @@
  * - Expert: Advanced minimax with opening book (6-8 ply)
  */
 
-import { Board, CellValue, Position } from '../types/game';
-
-export type AIDifficulty = 'easy' | 'medium' | 'hard' | 'expert';
+import { Board, CellValue, Position, AIDifficulty } from "../types/game";
 
 /**
  * Game constants for Connect Four AI logic.
  * These constants define the rules and scoring system for the AI evaluation engine.
- * 
+ *
  * @constant {number} WIN_LENGTH - The number of consecutive pieces required to win the game.
  *                                Standard Connect Four rule requiring exactly 4 pieces in a row.
  * @constant {number} THREE_IN_A_ROW - The threshold for detecting potential threats or opportunities
@@ -35,13 +33,13 @@ export type AIDifficulty = 'easy' | 'medium' | 'hard' | 'expert';
  *                                   than positional advantages but less than immediate wins.
  */
 export const CONNECT_FOUR_CONSTANTS = {
-  WIN_LENGTH: 4,              // Number of pieces needed to win
-  THREE_IN_A_ROW: 3,          // Threat detection threshold
-  TWO_IN_A_ROW: 2,            // Pattern recognition threshold
+  WIN_LENGTH: 4, // Number of pieces needed to win
+  THREE_IN_A_ROW: 3, // Threat detection threshold
+  TWO_IN_A_ROW: 2, // Pattern recognition threshold
   MULTIPLE_THREATS_THRESHOLD: 2, // Minimum threats for multiple threat detection
-  MAX_SEARCH_DISTANCE: 3,     // Maximum distance to search for patterns
-  WIN_SCORE: 10000,           // Score for winning positions
-  THREAT_SCORE: 100,          // Score for creating threats
+  MAX_SEARCH_DISTANCE: 3, // Maximum distance to search for patterns
+  WIN_SCORE: 10000, // Score for winning positions
+  THREAT_SCORE: 100, // Score for creating threats
 } as const;
 
 export interface AIGameState {
@@ -71,9 +69,17 @@ export class ConnectFourAI {
   private readonly config: AIConfig;
   private nodesEvaluated = 0;
   private startTime = 0;
+  private evaluationCache = new Map<string, number>();
 
-  constructor(difficulty: AIDifficulty = 'medium') {
+  constructor(difficulty: AIDifficulty = "medium") {
     this.config = this.getAIConfig(difficulty);
+  }
+
+  /**
+   * Clear evaluation cache to prevent memory leaks
+   */
+  public clearCache(): void {
+    this.evaluationCache.clear();
   }
 
   /**
@@ -87,17 +93,17 @@ export class ConnectFourAI {
     const validColumns = this.getValidColumns(board);
 
     if (validColumns.length === 0) {
-      throw new Error('No valid moves available');
+      throw new Error("No valid moves available");
     }
 
     switch (this.config.difficulty) {
-      case 'easy':
+      case "easy":
         return this.getEasyMove(gameState);
-      case 'medium':
+      case "medium":
         return this.getMediumMove(gameState);
-      case 'hard':
+      case "hard":
         return this.getHardMove(gameState);
-      case 'expert':
+      case "expert":
         return this.getExpertMove(gameState);
       default:
         return this.getMediumMove(gameState);
@@ -110,19 +116,25 @@ export class ConnectFourAI {
   private getEasyMove(gameState: AIGameState): AIMove {
     const { board } = gameState;
     const validColumns = this.getValidColumns(board);
-    
+
     // Check for immediate wins first (but sometimes miss them)
-    if (Math.random() > 0.3) { // 70% chance to see winning moves
+    if (Math.random() > 0.3) {
+      // 70% chance to see winning moves
       for (const col of validColumns) {
         const row = this.getLowestEmptyRow(board, col);
         if (row !== -1 && this.isWinningMove(board, row, col, 2)) {
-          return { column: col, evaluation: CONNECT_FOUR_CONSTANTS.WIN_SCORE / 10, depth: 1 };
+          return {
+            column: col,
+            evaluation: CONNECT_FOUR_CONSTANTS.WIN_SCORE / 10,
+            depth: 1,
+          };
         }
       }
     }
 
     // Check for blocking opponent wins (but sometimes miss them)
-    if (Math.random() > 0.4) { // 60% chance to see blocking moves
+    if (Math.random() > 0.4) {
+      // 60% chance to see blocking moves
       for (const col of validColumns) {
         const row = this.getLowestEmptyRow(board, col);
         if (row !== -1 && this.isWinningMove(board, row, col, 1)) {
@@ -132,20 +144,24 @@ export class ConnectFourAI {
     }
 
     // Use simple heuristic with some randomness
-    const columnScores = validColumns.map(col => ({
+    const columnScores = validColumns.map((col) => ({
       column: col,
-      score: this.getSimpleColumnScore(gameState, col) + (Math.random() - 0.5) * 20
+      score:
+        this.getSimpleColumnScore(gameState, col) + (Math.random() - 0.5) * 20,
     }));
 
     columnScores.sort((a, b) => b.score - a.score);
-    
+
     // Sometimes pick a random move instead of the best
-    const bestIndex = Math.random() < 0.2 ? Math.floor(Math.random() * Math.min(3, columnScores.length)) : 0;
-    
+    const bestIndex =
+      Math.random() < 0.2
+        ? Math.floor(Math.random() * Math.min(3, columnScores.length))
+        : 0;
+
     return {
       column: columnScores[bestIndex].column,
       evaluation: columnScores[bestIndex].score,
-      depth: 1
+      depth: 1,
     };
   }
 
@@ -155,8 +171,12 @@ export class ConnectFourAI {
   private getMediumMove(gameState: AIGameState): AIMove {
     const { board } = gameState;
     const validColumns = this.getValidColumns(board);
-    
-    let bestMove: AIMove = { column: validColumns[0], evaluation: -Infinity, depth: 2 };
+
+    let bestMove: AIMove = {
+      column: validColumns[0],
+      evaluation: -Infinity,
+      depth: 2,
+    };
 
     for (const col of validColumns) {
       const row = this.getLowestEmptyRow(board, col);
@@ -164,8 +184,14 @@ export class ConnectFourAI {
 
       // Make the move
       const newBoard = this.makeMove(board, row, col, 2);
-      const evaluation = this.evaluatePosition(newBoard, 1, 1, -Infinity, Infinity);
-      
+      const evaluation = this.evaluatePosition(
+        newBoard,
+        1,
+        1,
+        -Infinity,
+        Infinity
+      );
+
       if (evaluation > bestMove.evaluation) {
         bestMove = { column: col, evaluation, depth: 2 };
       }
@@ -180,14 +206,14 @@ export class ConnectFourAI {
   private getHardMove(gameState: AIGameState): AIMove {
     const { board } = gameState;
     const depth = this.config.maxDepth;
-    
+
     const result = this.minimax(board, depth, -Infinity, Infinity, true);
-    
+
     return {
       column: result.bestColumn,
       evaluation: result.evaluation,
       depth: depth,
-      pv: result.pv
+      pv: result.pv,
     };
   }
 
@@ -196,7 +222,7 @@ export class ConnectFourAI {
    */
   private getExpertMove(gameState: AIGameState): AIMove {
     const { board } = gameState;
-    
+
     // Check opening book first
     const openingMove = this.getOpeningBookMove(board);
     if (openingMove !== -1) {
@@ -205,12 +231,12 @@ export class ConnectFourAI {
 
     const depth = this.config.maxDepth;
     const result = this.minimax(board, depth, -Infinity, Infinity, true, true);
-    
+
     return {
       column: result.bestColumn,
       evaluation: result.evaluation,
       depth: depth,
-      pv: result.pv
+      pv: result.pv,
     };
   }
 
@@ -218,23 +244,23 @@ export class ConnectFourAI {
    * Minimax algorithm with alpha-beta pruning
    */
   private minimax(
-    board: Board, 
-    depth: number, 
-    alpha: number, 
-    beta: number, 
+    board: Board,
+    depth: number,
+    alpha: number,
+    beta: number,
     isMaximizing: boolean,
     useAdvancedEval = false
   ): { evaluation: number; bestColumn: number; pv?: number[] } {
     this.nodesEvaluated++;
 
     const validColumns = this.getValidColumns(board);
-    
+
     // Terminal node evaluation
     if (depth === 0 || validColumns.length === 0) {
-      const evaluation = useAdvancedEval 
+      const evaluation = useAdvancedEval
         ? this.evaluatePositionAdvanced(board)
         : this.evaluatePosition(board, isMaximizing ? 2 : 1, 0, alpha, beta);
-      
+
       return { evaluation, bestColumn: -1 };
     }
 
@@ -250,15 +276,24 @@ export class ConnectFourAI {
       if (row === -1) continue;
 
       const newBoard = this.makeMove(board, row, col, isMaximizing ? 2 : 1);
-      
+
       // Check for immediate win
       if (this.isWinningMove(board, row, col, isMaximizing ? 2 : 1)) {
-        const winValue = isMaximizing ? CONNECT_FOUR_CONSTANTS.WIN_SCORE + depth : -CONNECT_FOUR_CONSTANTS.WIN_SCORE - depth;
+        const winValue = isMaximizing
+          ? CONNECT_FOUR_CONSTANTS.WIN_SCORE + depth
+          : -CONNECT_FOUR_CONSTANTS.WIN_SCORE - depth;
         return { evaluation: winValue, bestColumn: col, pv: [col] };
       }
 
-      const result = this.minimax(newBoard, depth - 1, alpha, beta, !isMaximizing, useAdvancedEval);
-      
+      const result = this.minimax(
+        newBoard,
+        depth - 1,
+        alpha,
+        beta,
+        !isMaximizing,
+        useAdvancedEval
+      );
+
       if (isMaximizing) {
         if (result.evaluation > bestEvaluation) {
           bestEvaluation = result.evaluation;
@@ -281,10 +316,10 @@ export class ConnectFourAI {
       }
     }
 
-    return { 
-      evaluation: bestEvaluation, 
-      bestColumn, 
-      pv: principalVariation 
+    return {
+      evaluation: bestEvaluation,
+      bestColumn,
+      pv: principalVariation,
     };
   }
 
@@ -292,31 +327,33 @@ export class ConnectFourAI {
    * Enhanced position evaluation for medium/hard difficulties
    */
   private evaluatePosition(
-    board: Board, 
-    player: number, 
-    depth: number, 
-    alpha: number, 
+    board: Board,
+    player: number,
+    depth: number,
+    alpha: number,
     beta: number
   ): number {
     const opponent = player === 1 ? 2 : 1;
-    
+
     // Check for wins
-    if (this.hasWon(board, player)) return CONNECT_FOUR_CONSTANTS.WIN_SCORE / 10 - depth;
-    if (this.hasWon(board, opponent)) return -CONNECT_FOUR_CONSTANTS.WIN_SCORE / 10 + depth;
-    
+    if (this.hasWon(board, player))
+      return CONNECT_FOUR_CONSTANTS.WIN_SCORE / 10 - depth;
+    if (this.hasWon(board, opponent))
+      return -CONNECT_FOUR_CONSTANTS.WIN_SCORE / 10 + depth;
+
     let score = 0;
-    
+
     // Center column preference
     const centerCol = Math.floor(board[0].length / 2);
     for (let row = 0; row < board.length; row++) {
       if (board[row][centerCol] === player) score += 3;
       if (board[row][centerCol] === opponent) score -= 3;
     }
-    
+
     // Count potential winning positions
     score += this.countWinningPositions(board, player) * 2;
     score -= this.countWinningPositions(board, opponent) * 2;
-    
+
     return score;
   }
 
@@ -325,23 +362,23 @@ export class ConnectFourAI {
    */
   private evaluatePositionAdvanced(board: Board): number {
     let score = 0;
-    
+
     // Check for wins
     if (this.hasWon(board, 2)) return CONNECT_FOUR_CONSTANTS.WIN_SCORE;
     if (this.hasWon(board, 1)) return -CONNECT_FOUR_CONSTANTS.WIN_SCORE;
-    
+
     // Threat analysis
     score += this.evaluateThreats(board, 2) * 10;
     score -= this.evaluateThreats(board, 1) * 10;
-    
+
     // Positional evaluation
     score += this.evaluatePositional(board, 2);
     score -= this.evaluatePositional(board, 1);
-    
+
     // Connectivity evaluation
     score += this.evaluateConnectivity(board, 2);
     score -= this.evaluateConnectivity(board, 1);
-    
+
     return score;
   }
 
@@ -350,33 +387,33 @@ export class ConnectFourAI {
    */
   private getAIConfig(difficulty: AIDifficulty): AIConfig {
     switch (difficulty) {
-      case 'easy':
+      case "easy":
         return {
           difficulty,
           maxDepth: 1,
           mistakeRate: 0.3,
-          thinkingTime: 500
+          thinkingTime: 500,
         };
-      case 'medium':
+      case "medium":
         return {
           difficulty,
           maxDepth: 3,
           mistakeRate: 0.1,
-          thinkingTime: 1000
+          thinkingTime: 1000,
         };
-      case 'hard':
+      case "hard":
         return {
           difficulty,
           maxDepth: 5,
           mistakeRate: 0.02,
-          thinkingTime: 2000
+          thinkingTime: 2000,
         };
-      case 'expert':
+      case "expert":
         return {
           difficulty,
           maxDepth: 7,
           mistakeRate: 0,
-          thinkingTime: 3000
+          thinkingTime: 3000,
         };
     }
   }
@@ -401,13 +438,23 @@ export class ConnectFourAI {
     return -1;
   }
 
-  private makeMove(board: Board, row: number, col: number, player: number): Board {
-    const newBoard = board.map(row => [...row]);
+  private makeMove(
+    board: Board,
+    row: number,
+    col: number,
+    player: number
+  ): Board {
+    const newBoard = board.map((row) => [...row]);
     newBoard[row][col] = player as CellValue;
     return newBoard;
   }
 
-  private isWinningMove(board: Board, row: number, col: number, player: number): boolean {
+  private isWinningMove(
+    board: Board,
+    row: number,
+    col: number,
+    player: number
+  ): boolean {
     const newBoard = this.makeMove(board, row, col, player);
     return this.hasWon(newBoard, player);
   }
@@ -416,55 +463,63 @@ export class ConnectFourAI {
     // Check all directions for 4 in a row
     const rows = board.length;
     const cols = board[0].length;
-    
+
     // Horizontal
     for (let r = 0; r < rows; r++) {
       for (let c = 0; c <= cols - CONNECT_FOUR_CONSTANTS.WIN_LENGTH; c++) {
-        if (board[r][c] === player && 
-            board[r][c + 1] === player && 
-            board[r][c + 2] === player && 
-            board[r][c + 3] === player) {
+        if (
+          board[r][c] === player &&
+          board[r][c + 1] === player &&
+          board[r][c + 2] === player &&
+          board[r][c + 3] === player
+        ) {
           return true;
         }
       }
     }
-    
+
     // Vertical
     for (let r = 0; r <= rows - CONNECT_FOUR_CONSTANTS.WIN_LENGTH; r++) {
       for (let c = 0; c < cols; c++) {
-        if (board[r][c] === player && 
-            board[r + 1][c] === player && 
-            board[r + 2][c] === player && 
-            board[r + 3][c] === player) {
+        if (
+          board[r][c] === player &&
+          board[r + 1][c] === player &&
+          board[r + 2][c] === player &&
+          board[r + 3][c] === player
+        ) {
           return true;
         }
       }
     }
-    
+
     // Diagonal (top-left to bottom-right)
     for (let r = 0; r <= rows - CONNECT_FOUR_CONSTANTS.WIN_LENGTH; r++) {
       for (let c = 0; c <= cols - CONNECT_FOUR_CONSTANTS.WIN_LENGTH; c++) {
-        if (board[r][c] === player && 
-            board[r + 1][c + 1] === player && 
-            board[r + 2][c + 2] === player && 
-            board[r + 3][c + 3] === player) {
+        if (
+          board[r][c] === player &&
+          board[r + 1][c + 1] === player &&
+          board[r + 2][c + 2] === player &&
+          board[r + 3][c + 3] === player
+        ) {
           return true;
         }
       }
     }
-    
+
     // Diagonal (top-right to bottom-left)
     for (let r = 0; r <= rows - CONNECT_FOUR_CONSTANTS.WIN_LENGTH; r++) {
       for (let c = CONNECT_FOUR_CONSTANTS.WIN_LENGTH - 1; c < cols; c++) {
-        if (board[r][c] === player && 
-            board[r + 1][c - 1] === player && 
-            board[r + 2][c - 2] === player && 
-            board[r + 3][c - 3] === player) {
+        if (
+          board[r][c] === player &&
+          board[r + 1][c - 1] === player &&
+          board[r + 2][c - 2] === player &&
+          board[r + 3][c - 3] === player
+        ) {
           return true;
         }
       }
     }
-    
+
     return false;
   }
 
@@ -480,7 +535,7 @@ export class ConnectFourAI {
     let count = 0;
     const rows = board.length;
     const cols = board[0].length;
-    
+
     // Check all possible 4-cell windows
     for (let r = 0; r < rows; r++) {
       for (let c = 0; c < cols; c++) {
@@ -502,21 +557,28 @@ export class ConnectFourAI {
         }
       }
     }
-    
+
     return count;
   }
 
-  private evaluateWindow(board: Board, row: number, col: number, deltaRow: number, deltaCol: number, player: number): number {
+  private evaluateWindow(
+    board: Board,
+    row: number,
+    col: number,
+    deltaRow: number,
+    deltaCol: number,
+    player: number
+  ): number {
     const opponent = player === 1 ? 2 : 1;
     let playerCount = 0;
     let opponentCount = 0;
     let empty = 0;
-    
+
     // Check 4 consecutive cells in the given direction
     for (let i = 0; i < CONNECT_FOUR_CONSTANTS.WIN_LENGTH; i++) {
       const r = row + i * deltaRow;
       const c = col + i * deltaCol;
-      
+
       if (board[r][c] === player) {
         playerCount++;
       } else if (board[r][c] === opponent) {
@@ -525,15 +587,15 @@ export class ConnectFourAI {
         empty++;
       }
     }
-    
+
     // Can't win if opponent has pieces in this window
     if (opponentCount > 0) return 0;
-    
+
     // Scoring based on player pieces in window
     if (playerCount === CONNECT_FOUR_CONSTANTS.THREE_IN_A_ROW) return 50;
     if (playerCount === CONNECT_FOUR_CONSTANTS.TWO_IN_A_ROW) return 10;
     if (playerCount === 1) return 1;
-    
+
     return 0;
   }
 
@@ -542,22 +604,22 @@ export class ConnectFourAI {
     let threatScore = 0;
     const rows = board.length;
     const cols = board[0].length;
-    
+
     for (let col = 0; col < cols; col++) {
       const row = this.getLowestEmptyRow(board, col);
       if (row === -1) continue;
-      
+
       // Check if this move creates a threat (3 in a row with one open end)
       if (this.createsThreat(board, row, col, player)) {
         threatScore += 25;
       }
-      
+
       // Check if this move creates multiple threats
       if (this.createsMultipleThreats(board, row, col, player)) {
         threatScore += CONNECT_FOUR_CONSTANTS.THREAT_SCORE;
       }
     }
-    
+
     return threatScore;
   }
 
@@ -567,64 +629,72 @@ export class ConnectFourAI {
     const rows = board.length;
     const cols = board[0].length;
     const centerCol = Math.floor(cols / 2);
-    
+
     for (let r = 0; r < rows; r++) {
       for (let c = 0; c < cols; c++) {
         if (board[r][c] === player) {
           // Center columns are more valuable
           const centerDistance = Math.abs(c - centerCol);
           score += Math.max(0, 4 - centerDistance);
-          
+
           // Lower rows are more valuable (better foundation)
-          score += (rows - r);
+          score += rows - r;
         }
       }
     }
-    
+
     return score;
   }
 
   private evaluateConnectivity(board: Board, player: number): number {
-    // Evaluate piece connectivity and potential
+    const boardKey = `${board.flat().join("")}-${player}`;
+    if (this.evaluationCache.has(boardKey)) {
+      return this.evaluationCache.get(boardKey)!;
+    }
+
     let connectivityScore = 0;
     const rows = board.length;
     const cols = board[0].length;
-    
+
+    // Only check horizontal and vertical for connectivity (reduce from 8 to 4 directions)
+    // This reduces complexity while maintaining most of the strategic value
+    const directions = [
+      [0, 1],
+      [1, 0],
+      [1, 1],
+      [1, -1],
+    ];
+
     for (let r = 0; r < rows; r++) {
       for (let c = 0; c < cols; c++) {
         if (board[r][c] === player) {
-          // Count adjacent same-color pieces
-          let adjacentPieces = 0;
-          const directions = [
-            [-1, -1], [-1, 0], [-1, 1],
-            [0, -1],           [0, 1],
-            [1, -1],  [1, 0],  [1, 1]
-          ];
-          
           for (const [dr, dc] of directions) {
             const newR = r + dr;
             const newC = c + dc;
-            
-            if (newR >= 0 && newR < rows && newC >= 0 && newC < cols) {
-              if (board[newR][newC] === player) {
-                adjacentPieces++;
-              }
+
+            if (
+              newR >= 0 &&
+              newR < rows &&
+              newC >= 0 &&
+              newC < cols &&
+              board[newR][newC] === player
+            ) {
+              connectivityScore++;
             }
           }
-          
-          connectivityScore += adjacentPieces;
         }
       }
     }
-    
+
+    this.evaluationCache.set(boardKey, connectivityScore);
     return connectivityScore;
   }
 
   private orderMoves(validColumns: number[], board: Board): number[] {
     // Order moves for better alpha-beta pruning (center first)
     const centerCol = Math.floor(board[0].length / 2);
-    return validColumns.sort((a, b) => 
-      Math.abs(a - centerCol) - Math.abs(b - centerCol)
+    return validColumns.sort(
+      (a, b) => Math.abs(a - centerCol) - Math.abs(b - centerCol)
     );
   }
 
@@ -637,79 +707,96 @@ export class ConnectFourAI {
     return -1; // No opening book move
   }
 
-  private createsThreat(board: Board, row: number, col: number, player: number): boolean {
+  private createsThreat(
+    board: Board,
+    row: number,
+    col: number,
+    player: number
+  ): boolean {
     // Temporarily place the piece
     const newBoard = this.makeMove(board, row, col, player);
-    
+
     // Check if this creates 3-in-a-row with one open end
     const directions = [
-      [0, 1],   // horizontal
-      [1, 0],   // vertical
-      [1, 1],   // diagonal \
-      [1, -1]   // diagonal /
+      [0, 1], // horizontal
+      [1, 0], // vertical
+      [1, 1], // diagonal \
+      [1, -1], // diagonal /
     ];
-    
+
     for (const [dr, dc] of directions) {
       if (this.hasThreeInRowWithOpenEnd(newBoard, row, col, dr, dc, player)) {
         return true;
       }
     }
-    
+
     return false;
   }
 
-  private createsMultipleThreats(board: Board, row: number, col: number, player: number): boolean {
+  private createsMultipleThreats(
+    board: Board,
+    row: number,
+    col: number,
+    player: number
+  ): boolean {
     // Temporarily place the piece
     const newBoard = this.makeMove(board, row, col, player);
-    
+
     let threatCount = 0;
     const directions = [
-      [0, 1],   // horizontal
-      [1, 0],   // vertical  
-      [1, 1],   // diagonal \
-      [1, -1]   // diagonal /
+      [0, 1], // horizontal
+      [1, 0], // vertical
+      [1, 1], // diagonal \
+      [1, -1], // diagonal /
     ];
-    
+
     for (const [dr, dc] of directions) {
       if (this.hasThreeInRowWithOpenEnd(newBoard, row, col, dr, dc, player)) {
         threatCount++;
       }
     }
-    
+
     return threatCount >= CONNECT_FOUR_CONSTANTS.MULTIPLE_THREATS_THRESHOLD;
   }
 
-  private hasThreeInRowWithOpenEnd(board: Board, row: number, col: number, deltaRow: number, deltaCol: number, player: number): boolean {
+  private hasThreeInRowWithOpenEnd(
+    board: Board,
+    row: number,
+    col: number,
+    deltaRow: number,
+    deltaCol: number,
+    player: number
+  ): boolean {
     const rows = board.length;
     const cols = board[0].length;
-    
+
     // Count consecutive pieces in both directions
     let count = 1; // Count the placed piece
-    
+
     // Count in positive direction
     for (let i = 1; i < CONNECT_FOUR_CONSTANTS.MAX_SEARCH_DISTANCE + 1; i++) {
       const r = row + i * deltaRow;
       const c = col + i * deltaCol;
-      
+
       if (r >= 0 && r < rows && c >= 0 && c < cols && board[r][c] === player) {
         count++;
       } else {
         break;
       }
     }
-    
+
     // Count in negative direction
     for (let i = 1; i < CONNECT_FOUR_CONSTANTS.MAX_SEARCH_DISTANCE + 1; i++) {
       const r = row - i * deltaRow;
       const c = col - i * deltaCol;
-      
+
       if (r >= 0 && r < rows && c >= 0 && c < cols && board[r][c] === player) {
         count++;
       } else {
         break;
       }
     }
-    
+
     return count >= CONNECT_FOUR_CONSTANTS.THREE_IN_A_ROW;
   }
 }
