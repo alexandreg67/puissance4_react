@@ -1,5 +1,5 @@
 import React, { memo, useMemo } from 'react';
-import { GameMode } from './Types';
+import { GameMode } from '../types/game';
 import { useResponsive, getLayoutConfig, getSpacingConfig, getTextConfig } from '../utils/responsive';
 import {
 	UserIcon,
