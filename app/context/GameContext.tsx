@@ -2,7 +2,7 @@
 
 import React, { createContext, useContext, ReactNode, useMemo } from 'react';
 import { useConnect4Game } from '../hooks/useConnect4Game';
-import { Board, Player, GameMode, GameScore, Position } from '../types/game';
+import { Board, Player, GameMode, GameScore, Position, AIDifficulty } from '../types/game';
 
 interface GameContextType {
   // State
@@ -12,6 +12,8 @@ interface GameContextType {
   gameMode: GameMode | null;
   scores: GameScore;
   lastMove: Position | null;
+  aiDifficulty: AIDifficulty;
+  aiThinking: boolean;
   
   // Computed values
   isGameActive: boolean;
@@ -24,6 +26,8 @@ interface GameContextType {
   resetGame: () => void;
   startGame: (mode: GameMode) => void;
   changeMode: () => void;
+  setAIDifficulty: (difficulty: AIDifficulty) => void;
+  getAIInfo: () => { difficulty: AIDifficulty; description: string; maxDepth: number; estimatedStrength: number };
 }
 
 const GameContext = createContext<GameContextType | undefined>(undefined);
@@ -43,6 +47,8 @@ export const GameProvider: React.FC<GameProviderProps> = ({ children }) => {
     gameMode: gameState.gameMode,
     scores: gameState.scores,
     lastMove: gameState.lastMove,
+    aiDifficulty: gameState.aiDifficulty,
+    aiThinking: gameState.aiThinking,
     isGameActive: gameState.isGameActive,
     canMakeMove: gameState.canMakeMove,
     isDraw: gameState.isDraw,
@@ -50,7 +56,9 @@ export const GameProvider: React.FC<GameProviderProps> = ({ children }) => {
     handleClick: gameState.handleClick,
     resetGame: gameState.resetGame,
     startGame: gameState.startGame,
-    changeMode: gameState.changeMode
+    changeMode: gameState.changeMode,
+    setAIDifficulty: gameState.setAIDifficulty,
+    getAIInfo: gameState.getAIInfo
   }), [
     gameState.grid,
     gameState.currentPlayer,
@@ -58,6 +66,8 @@ export const GameProvider: React.FC<GameProviderProps> = ({ children }) => {
     gameState.gameMode,
     gameState.scores,
     gameState.lastMove,
+    gameState.aiDifficulty,
+    gameState.aiThinking,
     gameState.isGameActive,
     gameState.canMakeMove,
     gameState.isDraw,
@@ -65,7 +75,9 @@ export const GameProvider: React.FC<GameProviderProps> = ({ children }) => {
     gameState.handleClick,
     gameState.resetGame,
     gameState.startGame,
-    gameState.changeMode
+    gameState.changeMode,
+    gameState.setAIDifficulty,
+    gameState.getAIInfo
   ]);
 
   return (
@@ -87,7 +99,7 @@ export const useGameContext = (): GameContextType => {
 
 // Additional hook for accessing specific parts of the game state
 export const useGameState = () => {
-  const { grid, currentPlayer, winner, gameMode, scores, lastMove, isGameActive, canMakeMove, isDraw } = useGameContext();
+  const { grid, currentPlayer, winner, gameMode, scores, lastMove, aiDifficulty, aiThinking, isGameActive, canMakeMove, isDraw } = useGameContext();
   
   return {
     grid,
@@ -96,6 +108,8 @@ export const useGameState = () => {
     gameMode,
     scores,
     lastMove,
+    aiDifficulty,
+    aiThinking,
     isGameActive,
     canMakeMove,
     isDraw
@@ -103,13 +117,15 @@ export const useGameState = () => {
 };
 
 export const useGameActions = () => {
-  const { jouerCase, handleClick, resetGame, startGame, changeMode } = useGameContext();
+  const { jouerCase, handleClick, resetGame, startGame, changeMode, setAIDifficulty, getAIInfo } = useGameContext();
   
   return {
     jouerCase,
     handleClick,
     resetGame,
     startGame,
-    changeMode
+    changeMode,
+    setAIDifficulty,
+    getAIInfo
   };
 };

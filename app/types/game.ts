@@ -47,9 +47,14 @@ export interface IAGameState {
   nbColonne: number;
 }
 
+export type AIDifficulty = 'easy' | 'medium' | 'hard' | 'expert';
+
 export interface AIMove {
   column: number;
   score: number;
+  evaluation?: number;
+  depth?: number;
+  pv?: number[]; // Principal variation
 }
 
 export enum DifficultyLevel {
@@ -57,6 +62,12 @@ export enum DifficultyLevel {
   MEDIUM = 'medium',
   HARD = 'hard',
   EXPERT = 'expert'
+}
+
+export interface AISettings {
+  difficulty: AIDifficulty;
+  thinkingTime: number;
+  showThinking: boolean;
 }
 
 // Error types

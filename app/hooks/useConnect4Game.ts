@@ -1,6 +1,7 @@
 import { useState, useCallback, useMemo, useEffect, useRef } from 'react';
-import { Board, Player, GameState, GameMode, GameScore, Position, DEFAULT_GAME_CONFIG } from '../types/game';
+import { Board, Player, GameState, GameMode, GameScore, Position, DEFAULT_GAME_CONFIG, AIDifficulty } from '../types/game';
 import { IAGameState } from '../components/IA';
+import { getAIManager, AIManager } from '../ai/AIManager';
 import { 
   createEmptyBoard, 
   makeMove, 
@@ -18,6 +19,8 @@ interface UseConnect4GameReturn {
   gameMode: GameMode | null;
   scores: GameScore;
   lastMove: Position | null;
+  aiDifficulty: AIDifficulty;
+  aiThinking: boolean;
   
   // Computed values
   isGameActive: boolean;
@@ -30,6 +33,8 @@ interface UseConnect4GameReturn {
   resetGame: () => void;
   startGame: (mode: GameMode) => void;
   changeMode: () => void;
+  setAIDifficulty: (difficulty: AIDifficulty) => void;
+  getAIInfo: () => { difficulty: AIDifficulty; description: string; maxDepth: number; estimatedStrength: number };
 }
 
 const INITIAL_SCORES: GameScore = {
@@ -45,10 +50,19 @@ export const useConnect4Game = (): UseConnect4GameReturn => {
   const [gameMode, setGameMode] = useState<GameMode | null>(null);
   const [scores, setScores] = useState<GameScore>(INITIAL_SCORES);
   const [lastMove, setLastMove] = useState<Position | null>(null);
+  
+  // AI state
+  const [aiDifficulty, setAIDifficultyState] = useState<AIDifficulty>('medium');
+  const [aiThinking, setAIThinking] = useState<boolean>(false);
 
   // Refs to avoid infinite loops in useEffect
   const gridRef = useRef<Board>(grid);
   const aiProcessingRef = useRef<boolean>(false);
+  const aiManagerRef = useRef<AIManager>(getAIManager({ 
+    difficulty: aiDifficulty, 
+    showThinking: true, 
+    adaptiveTime: true 
+  }));
 
   // Update ref when grid changes
   useEffect(() => {
@@ -118,22 +132,15 @@ export const useConnect4Game = (): UseConnect4GameReturn => {
       !aiProcessingRef.current
     ) {
       aiProcessingRef.current = true;
+      setAIThinking(true);
       
       const aiMoveTimer = setTimeout(async () => {
         try {
-          // Import AI logic dynamically
-          const { default: IA } = await import('../components/IA');
-          
           const currentGrid = gridRef.current;
-          const gameState: IAGameState = {
-            grid: currentGrid.map(row => 
-              row.map(cell => cell === 1 ? 1 : cell === 2 ? 2 : 0)
-            ),
-            nbLigne: DEFAULT_GAME_CONFIG.rows,
-            nbColonne: DEFAULT_GAME_CONFIG.cols
-          };
-
-          const colIA = IA.choixColonne(gameState);
+          
+          // Use the new AI system
+          const aiResult = await aiManagerRef.current.getBestMove(currentGrid);
+          const colIA = aiResult.column;
           
           // Make AI move using current grid from ref
           if (isValidColumn(currentGrid, colIA)) {
@@ -176,15 +183,22 @@ export const useConnect4Game = (): UseConnect4GameReturn => {
           }
         } finally {
           aiProcessingRef.current = false;
+          setAIThinking(false);
         }
       }, DEFAULT_GAME_CONFIG.aiDelay);
 
       return () => {
         clearTimeout(aiMoveTimer);
         aiProcessingRef.current = false;
+        setAIThinking(false);
       };
     }
   }, [gameMode, currentPlayer, winner, isDraw]);
+
+  // Update AI manager when difficulty changes
+  useEffect(() => {
+    aiManagerRef.current.setDifficulty(aiDifficulty);
+  }, [aiDifficulty]);
 
   // Game control functions
   const resetGame = useCallback(() => {
@@ -206,6 +220,16 @@ export const useConnect4Game = (): UseConnect4GameReturn => {
     setScores(INITIAL_SCORES);
   }, [resetGame]);
 
+  // AI methods
+  const setAIDifficulty = useCallback((difficulty: AIDifficulty) => {
+    setAIDifficultyState(difficulty);
+    aiManagerRef.current.setDifficulty(difficulty);
+  }, []);
+
+  const getAIInfo = useCallback(() => {
+    return aiManagerRef.current.getAIInfo();
+  }, []);
+
   return {
     // State
     grid,
@@ -214,6 +238,8 @@ export const useConnect4Game = (): UseConnect4GameReturn => {
     gameMode,
     scores,
     lastMove,
+    aiDifficulty,
+    aiThinking,
     
     // Computed values
     isGameActive,
@@ -225,6 +251,8 @@ export const useConnect4Game = (): UseConnect4GameReturn => {
     handleClick,
     resetGame,
     startGame,
-    changeMode
+    changeMode,
+    setAIDifficulty,
+    getAIInfo
   };
 };

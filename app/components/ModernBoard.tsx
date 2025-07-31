@@ -6,6 +6,7 @@ import { GameProvider, useGameState, useGameActions } from '../context/GameConte
 import { OptimizedGrid } from './OptimizedGrid';
 import ScoreBoard from './ScoreBoard';
 import GameControls from './GameControls';
+import { AIDifficultySelector } from './AIDifficultySelector';
 
 // Loading component
 const GameLoading: React.FC = memo(() => (
@@ -96,8 +97,8 @@ GameStatus.displayName = 'GameStatus';
 
 // Main game content component
 const GameContent: React.FC = memo(() => {
-  const { grid, gameMode, scores, lastMove } = useGameState();
-  const { handleClick, changeMode } = useGameActions();
+  const { grid, gameMode, scores, lastMove, aiDifficulty, aiThinking } = useGameState();
+  const { handleClick, changeMode, setAIDifficulty } = useGameActions();
 
   if (!gameMode) {
     return <GameModeSelection />;
@@ -114,6 +115,18 @@ const GameContent: React.FC = memo(() => {
           Mode: {gameMode === 'Player vs Player' ? 'Joueur vs Joueur' : 'Joueur vs IA'}
         </p>
       </div>
+
+      {/* AI Difficulty Selector - Only show when playing against AI */}
+      {gameMode === 'Player vs IA' && (
+        <div className="w-full max-w-md">
+          <AIDifficultySelector
+            currentDifficulty={aiDifficulty}
+            onDifficultyChange={setAIDifficulty}
+            isAIThinking={aiThinking}
+            disabled={aiThinking}
+          />
+        </div>
+      )}
 
       {/* Score Board */}
       <ScoreBoard scores={scores} gameMode={gameMode} />
