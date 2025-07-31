@@ -1,5 +1,6 @@
 import { useState, useCallback, useMemo, useEffect } from 'react';
 import { Board, Player, GameState, GameMode, GameScore, Position, DEFAULT_GAME_CONFIG } from '../types/game';
+import { IAGameState } from '../components/IA';
 import { 
   createEmptyBoard, 
   makeMove, 
@@ -108,7 +109,8 @@ export const useConnect4Game = (): UseConnect4GameReturn => {
     ) {
       const aiMoveTimer = setTimeout(() => {
         // Import AI logic dynamically to avoid circular dependencies
-        import('../components/IA').then(({ default: IA, IAGameState }) => {
+        import('../components/IA').then((module) => {
+          const IA = module.default;
           try {
             const gameState: IAGameState = {
               grid: grid.map(row => 

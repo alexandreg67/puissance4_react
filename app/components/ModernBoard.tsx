@@ -65,7 +65,7 @@ const GameStatus: React.FC = memo(() => {
   if (!canMakeMove && gameMode === 'Player vs IA' && currentPlayer === 2) {
     return (
       <div className="text-xl font-semibold text-purple-600 text-center p-3 bg-purple-50 rounded-lg border border-purple-200">
-        🤖 L'IA réfléchit...
+        🤖 L&apos;IA réfléchit...
       </div>
     );
   }
@@ -138,7 +138,7 @@ const GameErrorFallback: React.FC = memo(() => (
       🚨 Erreur de jeu
     </div>
     <div className="text-red-700 mb-6 text-center max-w-md">
-      Une erreur s'est produite dans le jeu. Veuillez recharger la page.
+      Une erreur s&apos;est produite dans le jeu. Veuillez recharger la page.
     </div>
     <button
       onClick={() => window.location.reload()}
