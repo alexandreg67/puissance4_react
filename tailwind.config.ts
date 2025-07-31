@@ -71,22 +71,11 @@ const config: Config = {
       
       // Neon Text Shadows
       textShadow: {
-        'neon-sm': '0 0 5px currentColor',
-        'neon-md': '0 0 10px currentColor, 0 0 20px currentColor',
-        'neon-lg': '0 0 15px currentColor, 0 0 30px currentColor, 0 0 45px currentColor',
-        'neon-xl': '0 0 20px currentColor, 0 0 40px currentColor, 0 0 60px currentColor',
-        
-        // Multi-layer neon text effects
-        'neon-intense': `
-          0 0 7px currentColor,
-          0 0 10px currentColor,
-          0 0 21px currentColor,
-          0 0 42px currentColor,
-          0 0 82px currentColor,
-          0 0 92px currentColor,
-          0 0 102px currentColor,
-          0 0 151px currentColor
-        `,
+        'neon-sm': designTokens.textShadows.sm,
+        'neon-md': designTokens.textShadows.md,
+        'neon-lg': designTokens.textShadows.lg,
+        'neon-xl': designTokens.textShadows.xl,
+        'neon-intense': designTokens.textShadows.intense,
       },
       
       // Custom Animations
@@ -232,28 +221,19 @@ const config: Config = {
     function({ addUtilities }: PluginAPI) {
       const textShadowUtilities: Record<string, { textShadow: string }> = {
         '.text-shadow-neon-sm': {
-          textShadow: '0 0 5px currentColor'
+          textShadow: designTokens.textShadows.sm
         },
         '.text-shadow-neon-md': {
-          textShadow: '0 0 10px currentColor, 0 0 20px currentColor'
+          textShadow: designTokens.textShadows.md
         },
         '.text-shadow-neon-lg': {
-          textShadow: '0 0 15px currentColor, 0 0 30px currentColor, 0 0 45px currentColor'
+          textShadow: designTokens.textShadows.lg
         },
         '.text-shadow-neon-xl': {
-          textShadow: '0 0 20px currentColor, 0 0 40px currentColor, 0 0 60px currentColor'
+          textShadow: designTokens.textShadows.xl
         },
         '.text-shadow-neon-intense': {
-          textShadow: `
-            0 0 7px currentColor,
-            0 0 10px currentColor,
-            0 0 21px currentColor,
-            0 0 42px currentColor,
-            0 0 82px currentColor,
-            0 0 92px currentColor,
-            0 0 102px currentColor,
-            0 0 151px currentColor
-          `
+          textShadow: designTokens.textShadows.intense
         }
       };
       

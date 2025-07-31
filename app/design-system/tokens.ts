@@ -163,6 +163,25 @@ export const shadows = {
   }
 } as const;
 
+// Text Shadow Effects - Neon Glow for Typography
+export const textShadows = {
+  // Standard text shadows
+  sm: '0 0 5px currentColor',
+  md: '0 0 10px currentColor, 0 0 20px currentColor',
+  lg: '0 0 15px currentColor, 0 0 30px currentColor, 0 0 45px currentColor',
+  xl: '0 0 20px currentColor, 0 0 40px currentColor, 0 0 60px currentColor',
+  
+  // Ultra-intense neon effect - extracted for reusability
+  intense: `0 0 7px currentColor,
+    0 0 10px currentColor,
+    0 0 21px currentColor,
+    0 0 42px currentColor,
+    0 0 82px currentColor,
+    0 0 92px currentColor,
+    0 0 102px currentColor,
+    0 0 151px currentColor`
+} as const;
+
 // Border Radius
 export const borderRadius = {
   none: '0px',
@@ -234,6 +253,7 @@ export const designTokens = {
   typography,
   spacing,
   shadows,
+  textShadows,
   borderRadius,
   timing,
   breakpoints,

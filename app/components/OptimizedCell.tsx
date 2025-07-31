@@ -1,6 +1,6 @@
 'use client';
 
-import React, { memo, useMemo, useCallback } from 'react';
+import React, { memo, useMemo, useCallback, useState } from 'react';
 import { CellValue } from '../types/game';
 import { useResponsive, getGridConfig, getAnimationConfig, getInteractionConfig, shouldReduceEffects } from '../utils/responsive';
 
@@ -83,6 +83,9 @@ const CellComponent: React.FC<OptimizedCellProps> = ({
     return `Cell ${cellState}${lastMoveIndicator}`;
   }, [value, isLastMove]);
 
+  // State for managing willChange optimization
+  const [isInteracting, setIsInteracting] = useState(false);
+
   // PERFORMANCE FIX: Memoize style object to prevent recreation on every render
   const buttonStyle = useMemo(() => {
     const baseStyle = {
@@ -90,8 +93,8 @@ const CellComponent: React.FC<OptimizedCellProps> = ({
       transform: 'translateZ(0)',
       backfaceVisibility: 'hidden' as const,
       WebkitBackfaceVisibility: 'hidden' as const,
-      // Optimize hover performance for neon effects
-      willChange: isClickable ? 'transform, box-shadow, border-color' as const : 'auto' as const,
+      // OPTIMIZED: Only set willChange during active interactions to improve performance
+      willChange: (isClickable && isInteracting) ? 'transform, box-shadow, border-color' as const : 'auto' as const,
     };
 
     // Add mobile-specific styles conditionally
@@ -105,7 +108,28 @@ const CellComponent: React.FC<OptimizedCellProps> = ({
     }
 
     return baseStyle;
-  }, [isClickable, deviceType]);
+  }, [isClickable, deviceType, isInteracting]);
+
+  // Optimized interaction handlers for willChange management
+  const handleMouseEnter = useCallback(() => {
+    if (isClickable && interactionConfig.hoverEffects) {
+      setIsInteracting(true);
+    }
+  }, [isClickable, interactionConfig.hoverEffects]);
+
+  const handleMouseLeave = useCallback(() => {
+    setIsInteracting(false);
+  }, []);
+
+  const handleTouchStart = useCallback(() => {
+    if (isClickable) {
+      setIsInteracting(true);
+    }
+  }, [isClickable]);
+
+  const handleTouchEnd = useCallback(() => {
+    setIsInteracting(false);
+  }, []);
 
   // PERFORMANCE FIX: Memoize click handler
   const handleClick = useCallback(() => {
@@ -127,6 +151,10 @@ const CellComponent: React.FC<OptimizedCellProps> = ({
       className={cellStyles}
       onClick={handleClick}
       onKeyDown={handleKeyDown}
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
+      onTouchStart={handleTouchStart}
+      onTouchEnd={handleTouchEnd}
       disabled={!isClickable}
       data-testid={testId}
       aria-label={ariaLabel}

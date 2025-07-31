@@ -12,7 +12,26 @@ import { Board, CellValue, Position } from '../types/game';
 
 export type AIDifficulty = 'easy' | 'medium' | 'hard' | 'expert';
 
-// Game constants for better maintainability
+/**
+ * Game constants for Connect Four AI logic.
+ * These constants define the rules and scoring system for the AI evaluation engine.
+ * 
+ * @constant {number} WIN_LENGTH - The number of consecutive pieces required to win the game.
+ *                                Standard Connect Four rule requiring exactly 4 pieces in a row.
+ * @constant {number} THREE_IN_A_ROW - The threshold for detecting potential threats or opportunities
+ *                                     with three consecutive pieces. Critical for threat detection.
+ * @constant {number} TWO_IN_A_ROW - The threshold for recognizing patterns with two consecutive pieces.
+ *                                   Used for early-game strategy and pattern building evaluation.
+ * @constant {number} MAX_SEARCH_DISTANCE - The maximum distance (in cells) the AI will search for patterns
+ *                                          around a given position. Limits computational complexity while
+ *                                          maintaining strategic depth. Set to 3 to cover all relevant
+ *                                          Connect Four threat patterns.
+ * @constant {number} WIN_SCORE - The score assigned to a winning position. Set to 10000 to ensure
+ *                                the AI always prioritizes winning moves over all other considerations.
+ * @constant {number} THREAT_SCORE - The score assigned to creating or blocking threats. Set to 100
+ *                                   to make threat creation/blocking significantly more important
+ *                                   than positional advantages but less than immediate wins.
+ */
 export const CONNECT_FOUR_CONSTANTS = {
   WIN_LENGTH: 4,              // Number of pieces needed to win
   THREE_IN_A_ROW: 3,          // Threat detection threshold

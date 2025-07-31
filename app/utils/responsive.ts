@@ -93,96 +93,113 @@ export const useResponsive = () => {
   };
 };
 
-// Responsive grid configurations with viewport awareness
-export const getGridConfig = (deviceType: 'mobile' | 'tablet' | 'desktop', windowWidth?: number) => {
-  switch (deviceType) {
-    case 'mobile':
-      // Extra small screens (< 375px) - ultra compact to prevent overlap
-      if (windowWidth && windowWidth < RESPONSIVE_THRESHOLDS.ULTRA_SMALL_WIDTH) {
-        // Available width ≈ 320px - padding = ~300px
-        // 7 cells × 20px + 6 gaps × 6px = 140px + 36px = 176px (plenty of space)
-        return {
-          cellSize: 'w-5 h-5',
-          gap: 'gap-1.5',
-          gridPadding: 'p-3',
-          fontSize: 'text-xs',
-          iconSize: 'w-3 h-3',
-        };
-      }
-      // Very small screens (375px - 428px) - iPhone size optimization
-      if (windowWidth && windowWidth < RESPONSIVE_THRESHOLDS.SMALL_MOBILE_WIDTH) {
-        // Available width ≈ 375px - padding = ~350px
-        // 7 cells × 24px + 6 gaps × 8px = 168px + 48px = 216px (comfortable fit)
-        return {
-          cellSize: 'w-6 h-6',
-          gap: 'gap-2',
-          gridPadding: 'p-4',
-          fontSize: 'text-xs',
-          iconSize: 'w-3 h-3',
-        };
-      }
-      // Small screens (428px - 640px) - standard mobile with more spacing
-      return {
-        cellSize: 'w-8 h-8 sm:w-10 sm:h-10',
-        gap: 'gap-2.5 sm:gap-3',
-        gridPadding: 'p-4 sm:p-6',
-        fontSize: 'text-sm',
-        iconSize: 'w-4 h-4',
-      };
-    case 'tablet':
-      return {
-        cellSize: 'w-14 h-14 md:w-16 md:h-16 lg:w-18 lg:h-18',
-        gap: 'gap-2 md:gap-2.5',
-        gridPadding: 'p-4 md:p-6',
-        fontSize: 'text-base',
-        iconSize: 'w-5 h-5',
-      };
-    case 'desktop':
-    default:
-      return {
-        cellSize: 'w-18 h-18 lg:w-20 lg:h-20',
-        gap: 'gap-2.5 lg:gap-3',
-        gridPadding: 'p-6 lg:p-8',
-        fontSize: 'text-lg',
-        iconSize: 'w-6 h-6',
-      };
+// Optimized lookup tables for responsive configurations
+const GRID_CONFIG_LOOKUP = {
+  'ultra-small': {
+    cellSize: 'w-5 h-5',
+    gap: 'gap-1.5',
+    gridPadding: 'p-3',
+    fontSize: 'text-xs',
+    iconSize: 'w-3 h-3',
+  },
+  'small-mobile': {
+    cellSize: 'w-6 h-6',
+    gap: 'gap-2',
+    gridPadding: 'p-4',
+    fontSize: 'text-xs',
+    iconSize: 'w-3 h-3',
+  },
+  'mobile': {
+    cellSize: 'w-8 h-8 sm:w-10 sm:h-10',
+    gap: 'gap-2.5 sm:gap-3',
+    gridPadding: 'p-4 sm:p-6',
+    fontSize: 'text-sm',
+    iconSize: 'w-4 h-4',
+  },
+  'tablet': {
+    cellSize: 'w-14 h-14 md:w-16 md:h-16 lg:w-18 lg:h-18',
+    gap: 'gap-2 md:gap-2.5',
+    gridPadding: 'p-4 md:p-6',
+    fontSize: 'text-base',
+    iconSize: 'w-5 h-5',
+  },
+  'desktop': {
+    cellSize: 'w-18 h-18 lg:w-20 lg:h-20',
+    gap: 'gap-2.5 lg:gap-3',
+    gridPadding: 'p-6 lg:p-8',
+    fontSize: 'text-lg',
+    iconSize: 'w-6 h-6',
   }
+} as const;
+
+// Memoized grid configuration function with optimized lookup
+export const getGridConfig = (deviceType: 'mobile' | 'tablet' | 'desktop', windowWidth?: number) => {
+  // Fast lookup for mobile sub-categories
+  if (deviceType === 'mobile' && windowWidth) {
+    if (windowWidth < RESPONSIVE_THRESHOLDS.ULTRA_SMALL_WIDTH) {
+      return GRID_CONFIG_LOOKUP['ultra-small'];
+    }
+    if (windowWidth < RESPONSIVE_THRESHOLDS.SMALL_MOBILE_WIDTH) {
+      return GRID_CONFIG_LOOKUP['small-mobile'];
+    }
+  }
+  
+  // Direct lookup for main device types
+  return GRID_CONFIG_LOOKUP[deviceType] || GRID_CONFIG_LOOKUP.desktop;
 };
 
-// Responsive animation configurations
+// Optimized animation configuration lookup table
+const ANIMATION_CONFIG_LOOKUP = {
+  mobile: {
+    enableComplexAnimations: false,
+    pulseIntensity: 'animate-pulse',
+    transitionDuration: 'duration-200',
+    glowIntensity: 'shadow-lg',
+  },
+  tablet: {
+    enableComplexAnimations: true,
+    pulseIntensity: 'animate-neon-pulse',
+    transitionDuration: 'duration-300',
+    glowIntensity: 'shadow-neon-md',
+  },
+  desktop: {
+    enableComplexAnimations: true,
+    pulseIntensity: 'animate-neon-pulse',
+    transitionDuration: 'duration-300',
+    glowIntensity: 'shadow-neon-lg',
+  },
+} as const;
+
+// Fast lookup for animation configurations
 export const getAnimationConfig = (deviceType: 'mobile' | 'tablet' | 'desktop') => {
-  const baseConfig = {
-    mobile: {
-      enableComplexAnimations: false,
-      pulseIntensity: 'animate-pulse',
-      transitionDuration: 'duration-200',
-      glowIntensity: 'shadow-lg',
-    },
-    tablet: {
-      enableComplexAnimations: true,
-      pulseIntensity: 'animate-neon-pulse',
-      transitionDuration: 'duration-300',
-      glowIntensity: 'shadow-neon-md',
-    },
-    desktop: {
-      enableComplexAnimations: true,
-      pulseIntensity: 'animate-neon-pulse',
-      transitionDuration: 'duration-300',
-      glowIntensity: 'shadow-neon-lg',
-    },
-  };
-
-  return baseConfig[deviceType];
+  return ANIMATION_CONFIG_LOOKUP[deviceType];
 };
 
-// Touch vs mouse interaction optimizations
-export const getInteractionConfig = (deviceType: 'mobile' | 'tablet' | 'desktop') => {
-  return {
-    tapTargetSize: deviceType === 'mobile' ? 'min-w-12 min-h-12' : 'min-w-8 min-h-8',
-    hoverEffects: deviceType === 'desktop',
-    touchFeedback: deviceType !== 'desktop',
+// Optimized interaction configuration lookup table
+const INTERACTION_CONFIG_LOOKUP = {
+  mobile: {
+    tapTargetSize: 'min-w-12 min-h-12',
+    hoverEffects: false,
+    touchFeedback: true,
     focusRing: 'focus:ring-2 focus:ring-neon-cyan/50 focus:outline-none',
-  };
+  },
+  tablet: {
+    tapTargetSize: 'min-w-8 min-h-8',
+    hoverEffects: false,
+    touchFeedback: true,
+    focusRing: 'focus:ring-2 focus:ring-neon-cyan/50 focus:outline-none',
+  },
+  desktop: {
+    tapTargetSize: 'min-w-8 min-h-8',
+    hoverEffects: true,
+    touchFeedback: false,
+    focusRing: 'focus:ring-2 focus:ring-neon-cyan/50 focus:outline-none',
+  },
+} as const;
+
+// Fast lookup for interaction configurations
+export const getInteractionConfig = (deviceType: 'mobile' | 'tablet' | 'desktop') => {
+  return INTERACTION_CONFIG_LOOKUP[deviceType];
 };
 
 // Responsive text scaling with viewport awareness
@@ -263,11 +280,26 @@ export const getSpacingConfig = (deviceType: 'mobile' | 'tablet' | 'desktop', wi
   }
 };
 
-// Layout configurations
+// Optimized layout configuration lookup table
+const LAYOUT_CONFIG_LOOKUP = {
+  mobile: {
+    scoreboardLayout: 'flex-col space-y-4',
+    gameControlsLayout: 'flex-col space-y-3',
+    maxWidth: 'max-w-sm',
+  },
+  tablet: {
+    scoreboardLayout: 'flex-row space-x-8',
+    gameControlsLayout: 'flex-row space-x-6',
+    maxWidth: 'max-w-2xl',
+  },
+  desktop: {
+    scoreboardLayout: 'flex-row space-x-8',
+    gameControlsLayout: 'flex-row space-x-6',
+    maxWidth: 'max-w-5xl',
+  },
+} as const;
+
+// Fast lookup for layout configurations
 export const getLayoutConfig = (deviceType: 'mobile' | 'tablet' | 'desktop') => {
-  return {
-    scoreboardLayout: deviceType === 'mobile' ? 'flex-col space-y-4' : 'flex-row space-x-8',
-    gameControlsLayout: deviceType === 'mobile' ? 'flex-col space-y-3' : 'flex-row space-x-6',
-    maxWidth: deviceType === 'mobile' ? 'max-w-sm' : deviceType === 'tablet' ? 'max-w-2xl' : 'max-w-5xl',
-  };
+  return LAYOUT_CONFIG_LOOKUP[deviceType];
 };

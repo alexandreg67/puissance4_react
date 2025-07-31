@@ -7,6 +7,7 @@ import { OptimizedGrid } from './OptimizedGrid';
 import ScoreBoard from './ScoreBoard';
 import GameControls from './GameControls';
 import { AIDifficultySelector } from './AIDifficultySelector';
+import { useResponsive } from '../utils/responsive';
 
 // Loading component
 const GameLoading: React.FC = memo(() => (
@@ -39,6 +40,58 @@ const GameLoading: React.FC = memo(() => (
 ));
 
 GameLoading.displayName = 'GameLoading';
+
+// Optimized background particles component
+const BackgroundParticles: React.FC = memo(() => {
+  const { deviceType } = useResponsive();
+  
+  // CSS variables for animation delays to improve performance
+  const particleStyles = useMemo(() => ({
+    '--delay-1': '1s',
+    '--delay-2': '2s', 
+    '--delay-3': '3s'
+  } as React.CSSProperties), []);
+
+  // Reduce particles on mobile for better performance
+  if (deviceType === 'mobile') {
+    return (
+      <div className="absolute inset-0 pointer-events-none" style={particleStyles}>
+        {/* Only 2 particles on mobile */}
+        <div 
+          className="absolute top-1/4 left-1/4 w-1.5 h-1.5 bg-neon-cyan rounded-full animate-neon-pulse opacity-20"
+          style={{ animationDelay: 'var(--delay-1)' }}
+        ></div>
+        <div 
+          className="absolute bottom-1/3 right-1/3 w-1 h-1 bg-neon-magenta rounded-full animate-neon-pulse-slow opacity-15"
+          style={{ animationDelay: 'var(--delay-2)' }}
+        ></div>
+      </div>
+    );
+  }
+
+  // Full particle set for desktop/tablet
+  return (
+    <div className="absolute inset-0 pointer-events-none" style={particleStyles}>
+      <div 
+        className="absolute top-1/4 left-1/4 w-2 h-2 bg-neon-cyan rounded-full animate-neon-pulse opacity-30"
+      ></div>
+      <div 
+        className="absolute top-1/3 right-1/3 w-1 h-1 bg-neon-magenta rounded-full animate-neon-pulse-fast opacity-20"
+        style={{ animationDelay: 'var(--delay-2)' }}
+      ></div>
+      <div 
+        className="absolute bottom-1/4 left-1/3 w-1.5 h-1.5 bg-neon-green rounded-full animate-neon-pulse-slow opacity-25"
+        style={{ animationDelay: 'var(--delay-1)' }}
+      ></div>
+      <div 
+        className="absolute top-2/3 right-1/4 w-1 h-1 bg-neon-yellow rounded-full animate-neon-pulse opacity-30"
+        style={{ animationDelay: 'var(--delay-3)' }}
+      ></div>
+    </div>
+  );
+});
+
+BackgroundParticles.displayName = 'BackgroundParticles';
 
 // Game mode selection component
 const GameModeSelection: React.FC = memo(() => {
@@ -310,13 +363,8 @@ export const ModernBoard: React.FC = memo(() => {
     <ErrorBoundary fallback={<GameErrorFallback />}>
       <GameProvider>
         <div className="min-h-screen cyber-grid relative overflow-hidden">
-          {/* Animated background particles */}
-          <div className="absolute inset-0 pointer-events-none">
-            <div className="absolute top-1/4 left-1/4 w-2 h-2 bg-neon-cyan rounded-full animate-neon-pulse opacity-30"></div>
-            <div className="absolute top-1/3 right-1/3 w-1 h-1 bg-neon-magenta rounded-full animate-neon-pulse-fast opacity-20" style={{ animationDelay: '2s' }}></div>
-            <div className="absolute bottom-1/4 left-1/3 w-1.5 h-1.5 bg-neon-green rounded-full animate-neon-pulse-slow opacity-25" style={{ animationDelay: '1s' }}></div>
-            <div className="absolute top-2/3 right-1/4 w-1 h-1 bg-neon-yellow rounded-full animate-neon-pulse opacity-30" style={{ animationDelay: '3s' }}></div>
-          </div>
+          {/* Optimized animated background particles */}
+          <BackgroundParticles />
           
           <div className="container mx-auto px-4 relative z-10">
             <Suspense fallback={<GameLoading />}>
