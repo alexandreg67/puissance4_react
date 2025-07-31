@@ -31,25 +31,37 @@ const GridComponent: React.FC<OptimizedGridProps> = ({
   }, [canMakeMove, handleClick]);
 
   return (
-    <div className={`flex flex-col items-center ${spacingConfig.sectionSpacing}`}>
+    <div className={`flex flex-col items-center ${spacingConfig.sectionSpacing} w-full max-w-full`}>
       {/* Cyberpunk Grid Container */}
-      <div className="relative">
-        {/* Outer glow effect */}
-        <div className="absolute -inset-4 bg-neon-gradient-1 opacity-20 blur-xl rounded-3xl animate-neon-pulse-slow"></div>
+      <div className="relative w-full max-w-full overflow-hidden">
+        {/* Outer glow effect - reduced on mobile */}
+        <div className={`absolute bg-neon-gradient-1 opacity-20 blur-xl rounded-3xl animate-neon-pulse-slow ${
+          deviceType === 'mobile' ? '-inset-1 xs:-inset-2' : '-inset-4'
+        }`}></div>
         
         {/* Main grid with advanced glassmorphism */}
         <div 
-          className={`relative grid grid-cols-7 ${gridConfig.gap} ${gridConfig.gridPadding} backdrop-blur-lg rounded-3xl shadow-2xl border-2 border-neon-cyan/30 overflow-hidden`}
+          className={`relative grid grid-cols-7 ${gridConfig.gap} ${gridConfig.gridPadding} backdrop-blur-lg rounded-3xl shadow-2xl border-2 border-neon-cyan/30 overflow-hidden mx-auto`}
           style={{
             background: `
               linear-gradient(135deg, rgba(0, 255, 255, 0.05) 0%, rgba(255, 0, 255, 0.05) 100%),
               rgba(10, 10, 10, 0.8)
             `,
-            boxShadow: `
-              0 0 30px rgba(0, 255, 255, 0.3),
-              0 0 60px rgba(255, 0, 255, 0.2),
-              inset 0 1px 0 rgba(255, 255, 255, 0.1)
-            `
+            // Reduced shadow on mobile to prevent overflow
+            boxShadow: deviceType === 'mobile' 
+              ? `
+                0 0 15px rgba(0, 255, 255, 0.2),
+                0 0 30px rgba(255, 0, 255, 0.1),
+                inset 0 1px 0 rgba(255, 255, 255, 0.1)
+              `
+              : `
+                0 0 30px rgba(0, 255, 255, 0.3),
+                0 0 60px rgba(255, 0, 255, 0.2),
+                inset 0 1px 0 rgba(255, 255, 255, 0.1)
+              `,
+            // Ensure the grid fits within viewport
+            maxWidth: deviceType === 'mobile' ? 'calc(100vw - 16px)' : 'none',
+            width: 'fit-content'
           }}
           role="grid"
           aria-label="Grille de jeu Connect Four cyberpunk, 6 rangées et 7 colonnes"
@@ -116,7 +128,7 @@ const GridComponent: React.FC<OptimizedGridProps> = ({
       </div>
       
       {/* Futuristic Column Indicators */}
-      <div className={`flex ${gridConfig.gap}`}>
+      <div className={`flex ${gridConfig.gap} justify-center w-full max-w-full overflow-hidden`}>
         {Array.from({ length: 7 }, (_, index) => (
           <div
             key={index}
@@ -134,7 +146,9 @@ const GridComponent: React.FC<OptimizedGridProps> = ({
       </div>
 
       {/* Grid status display */}
-      <div className="hud-panel text-neon-cyan border-neon-cyan px-6 py-2 rounded-full opacity-40">
+      <div className={`hud-panel text-neon-cyan border-neon-cyan rounded-full opacity-40 ${
+        deviceType === 'mobile' ? 'px-3 py-1.5 text-xs' : 'px-6 py-2 text-xs'
+      } max-w-full`}>
         <div className="flex items-center space-x-3 text-xs font-mono tracking-wider">
           <div className="w-2 h-2 bg-current rounded-full animate-neon-pulse"></div>
           <span>GRID MATRIX ACTIVE</span>

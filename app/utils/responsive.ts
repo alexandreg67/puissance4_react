@@ -65,12 +65,22 @@ export const useResponsive = () => {
 export const getGridConfig = (deviceType: 'mobile' | 'tablet' | 'desktop', windowWidth?: number) => {
   switch (deviceType) {
     case 'mobile':
-      // Extra small screens (< 375px) - very compact
+      // Extra small screens (< 375px) - very compact to fit perfectly
       if (windowWidth && windowWidth < 375) {
         return {
-          cellSize: 'w-8 h-8 xs:w-10 xs:h-10 sm:w-12 sm:h-12',
-          gap: 'gap-1 sm:gap-2',
-          gridPadding: 'p-2 sm:p-4',
+          cellSize: 'w-7 h-7 xs:w-8 xs:h-8 sm:w-10 sm:h-10',
+          gap: 'gap-0.5 xs:gap-1 sm:gap-2',
+          gridPadding: 'p-1 xs:p-2 sm:p-4',
+          fontSize: 'text-xs sm:text-sm',
+          iconSize: 'w-3 h-3 sm:w-4 sm:h-4',
+        };
+      }
+      // Very small screens (375px - 428px) - iPhone size optimization
+      if (windowWidth && windowWidth < 428) {
+        return {
+          cellSize: 'w-8 h-8 xs:w-9 xs:h-9 sm:w-11 sm:h-11',
+          gap: 'gap-1 xs:gap-1.5 sm:gap-2',
+          gridPadding: 'p-1.5 xs:p-2.5 sm:p-4',
           fontSize: 'text-xs sm:text-sm',
           iconSize: 'w-3 h-3 sm:w-4 sm:h-4',
         };

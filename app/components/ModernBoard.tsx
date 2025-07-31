@@ -185,7 +185,7 @@ const GameContent: React.FC = memo(() => {
   }
 
   return (
-    <div className="flex flex-col items-center space-y-4 xs:space-y-6 sm:space-y-8 w-full max-w-5xl mx-auto p-2 xs:p-4 sm:p-6 matrix-bg min-h-screen">
+    <div className="flex flex-col items-center space-y-4 xs:space-y-6 sm:space-y-8 w-full max-w-5xl mx-auto px-1 py-2 xs:px-2 xs:py-4 sm:p-6 matrix-bg min-h-screen overflow-hidden">
       {/* Cyberpunk Header */}
       <div className="text-center space-y-3 xs:space-y-4 sm:space-y-6 py-4 xs:py-6 sm:py-8">
         <div className="relative">

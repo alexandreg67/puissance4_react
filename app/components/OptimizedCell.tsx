@@ -66,8 +66,11 @@ const CellComponent: React.FC<OptimizedCellProps> = ({
       ? `cursor-pointer ${interactionConfig.focusRing} ${interactionConfig.hoverEffects ? 'hover:scale-105' : ''} ${interactionConfig.touchFeedback ? 'active:scale-95' : ''}` 
       : 'cursor-default';
 
-    return `${baseClasses} ${performanceClasses} ${colorClasses} ${lastMoveClasses} ${interactionClasses} ${hoverClasses}`;
-  }, [value, isLastMove, isClickable, gridConfig, animationConfig, interactionConfig]);
+    // Prevent overflow on mobile with box constraints
+    const containerClasses = deviceType === 'mobile' ? 'max-w-full flex-shrink-0' : '';
+
+    return `${baseClasses} ${performanceClasses} ${colorClasses} ${lastMoveClasses} ${interactionClasses} ${hoverClasses} ${containerClasses}`;
+  }, [value, isLastMove, isClickable, gridConfig, animationConfig, interactionConfig, deviceType]);
 
   // PERFORMANCE FIX: Memoize aria-label to prevent string recalculation
   const ariaLabel = useMemo(() => {
@@ -107,6 +110,12 @@ const CellComponent: React.FC<OptimizedCellProps> = ({
         WebkitBackfaceVisibility: 'hidden',
         // Optimize hover performance for neon effects
         willChange: isClickable ? 'transform, box-shadow, border-color' : 'auto',
+        // Prevent overflow on mobile
+        ...(deviceType === 'mobile' && {
+          boxSizing: 'border-box',
+          maxWidth: '100%',
+          flexShrink: 0
+        })
       }}
     >
       {/* Energy core effect for filled cells */}
