@@ -1,12 +1,5 @@
-import Board from './components/Board';
+import { ModernBoard } from './components/ModernBoard';
 
 export default function Home() {
-	return (
-		<div
-			className="min-h-screen flex flex-col justify-center items-center
-				bg-gray-100"
-		>
-			<Board />
-		</div>
-	);
+	return <ModernBoard />;
 }
