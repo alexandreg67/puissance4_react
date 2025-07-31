@@ -3,7 +3,7 @@ import React from 'react';
 export type GameMode = 'Player vs Player' | 'Player vs IA';
 
 type GameControlsProps = {
-	winner: string;
+	winner: string | 'Draw';
 	resetGame: () => void;
 	setGameMode: React.Dispatch<React.SetStateAction<GameMode | null>>;
 };
@@ -15,8 +15,8 @@ const GameControls: React.FC<GameControlsProps> = ({
 }) => {
 	return (
 		<div className="fixed top-0 left-0 right-0 bg-white bg-opacity-90 p-4 flex flex-col items-center z-50">
-			<div className="text-2xl font-bold text-green-500 mb-4">
-				{winner} a gagné !
+			<div className={`text-2xl font-bold mb-4 ${winner === 'Draw' ? 'text-yellow-500' : 'text-green-500'}`}>
+				{winner === 'Draw' ? 'Match nul !' : `${winner} a gagné !`}
 			</div>
 			<div className="text-center">
 				<button

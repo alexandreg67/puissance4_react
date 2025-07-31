@@ -1,6 +1,5 @@
 import { useState, useCallback, useMemo, useEffect, useRef } from 'react';
-import { Board, Player, GameState, GameMode, GameScore, Position, DEFAULT_GAME_CONFIG, AIDifficulty } from '../types/game';
-import { IAGameState } from '../components/IA';
+import { Board, Player, GameState, GameMode, GameScore, Position, DEFAULT_GAME_CONFIG, AIDifficulty, IAGameState } from '../types/game';
 import { getAIManager, AIManager } from '../ai/AIManager';
 import { 
   createEmptyBoard, 
