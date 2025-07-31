@@ -66,29 +66,43 @@ const GridComponent: React.FC<OptimizedGridProps> = ({
   );
 };
 
-// Memoized grid with deep comparison for grid array
+// PERFORMANCE FIX: Memoized grid with optimized comparison
 export const OptimizedGrid = memo(GridComponent, (prevProps, nextProps) => {
-  // Compare all props
-  if (
-    prevProps.canMakeMove !== nextProps.canMakeMove ||
-    prevProps.handleClick !== nextProps.handleClick
-  ) {
+  // Quick reference check first (most common case)
+  if (prevProps.grid === nextProps.grid && 
+      prevProps.handleClick === nextProps.handleClick &&
+      prevProps.canMakeMove === nextProps.canMakeMove &&
+      prevProps.lastMove === nextProps.lastMove) {
+    return true;
+  }
+
+  // Compare primitive props
+  if (prevProps.canMakeMove !== nextProps.canMakeMove) {
     return false;
   }
 
-  // Compare lastMove
-  if (
-    prevProps.lastMove?.row !== nextProps.lastMove?.row ||
-    prevProps.lastMove?.col !== nextProps.lastMove?.col
-  ) {
+  // Compare function references (should be stable with useCallback)
+  if (prevProps.handleClick !== nextProps.handleClick) {
     return false;
   }
 
-  // Deep compare grid - only way to ensure accuracy for 2D array
+  // Compare lastMove object
+  if (prevProps.lastMove !== nextProps.lastMove) {
+    if (!prevProps.lastMove || !nextProps.lastMove) {
+      return false;
+    }
+    if (prevProps.lastMove.row !== nextProps.lastMove.row ||
+        prevProps.lastMove.col !== nextProps.lastMove.col) {
+      return false;
+    }
+  }
+
+  // Optimized grid comparison - check dimensions first
   if (prevProps.grid.length !== nextProps.grid.length) {
     return false;
   }
 
+  // Deep compare grid cells
   for (let i = 0; i < prevProps.grid.length; i++) {
     const prevRow = prevProps.grid[i];
     const nextRow = nextProps.grid[i];

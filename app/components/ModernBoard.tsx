@@ -1,6 +1,6 @@
 'use client';
 
-import React, { memo, Suspense } from 'react';
+import React, { memo, Suspense, useMemo } from 'react';
 import { ErrorBoundary } from './ErrorBoundary';
 import { GameProvider, useGameState, useGameActions } from '../context/GameContext';
 import { OptimizedGrid } from './OptimizedGrid';
@@ -50,31 +50,36 @@ const GameModeSelection: React.FC = memo(() => {
 
 GameModeSelection.displayName = 'GameModeSelection';
 
-// Game status display
+// PERFORMANCE FIX: Game status display with proper memoization
 const GameStatus: React.FC = memo(() => {
   const { currentPlayer, winner, canMakeMove, gameMode } = useGameState();
 
-  if (winner) {
+  // Memoize the status message to prevent recalculation
+  const statusContent = useMemo(() => {
+    if (winner) {
+      return (
+        <div className="text-2xl font-bold text-green-600 text-center p-4 bg-green-50 rounded-xl border-2 border-green-200">
+          🎉 {winner} a gagné !
+        </div>
+      );
+    }
+
+    if (!canMakeMove && gameMode === 'Player vs IA' && currentPlayer === 2) {
+      return (
+        <div className="text-xl font-semibold text-purple-600 text-center p-3 bg-purple-50 rounded-lg border border-purple-200">
+          🤖 L&apos;IA réfléchit...
+        </div>
+      );
+    }
+
     return (
-      <div className="text-2xl font-bold text-green-600 text-center p-4 bg-green-50 rounded-xl border-2 border-green-200">
-        🎉 {winner} a gagné !
+      <div className="text-xl font-semibold text-blue-600 text-center p-3 bg-blue-50 rounded-lg border border-blue-200">
+        {currentPlayer === 1 ? '🔴' : '🟡'} Au tour du {currentPlayer === 1 ? 'Joueur 1' : 'Joueur 2'}
       </div>
     );
-  }
+  }, [winner, canMakeMove, gameMode, currentPlayer]);
 
-  if (!canMakeMove && gameMode === 'Player vs IA' && currentPlayer === 2) {
-    return (
-      <div className="text-xl font-semibold text-purple-600 text-center p-3 bg-purple-50 rounded-lg border border-purple-200">
-        🤖 L&apos;IA réfléchit...
-      </div>
-    );
-  }
-
-  return (
-    <div className="text-xl font-semibold text-blue-600 text-center p-3 bg-blue-50 rounded-lg border border-blue-200">
-      {currentPlayer === 1 ? '🔴' : '🟡'} Au tour du {currentPlayer === 1 ? 'Joueur 1' : 'Joueur 2'}
-    </div>
-  );
+  return statusContent;
 });
 
 GameStatus.displayName = 'GameStatus';

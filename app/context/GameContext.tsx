@@ -1,6 +1,6 @@
 'use client';
 
-import React, { createContext, useContext, ReactNode } from 'react';
+import React, { createContext, useContext, ReactNode, useMemo } from 'react';
 import { useConnect4Game } from '../hooks/useConnect4Game';
 import { Board, Player, GameMode, GameScore, Position } from '../types/game';
 
@@ -35,8 +35,41 @@ interface GameProviderProps {
 export const GameProvider: React.FC<GameProviderProps> = ({ children }) => {
   const gameState = useConnect4Game();
 
+  // CRITICAL FIX: Memoize context value to prevent unnecessary re-renders
+  const contextValue = useMemo(() => ({
+    grid: gameState.grid,
+    currentPlayer: gameState.currentPlayer,
+    winner: gameState.winner,
+    gameMode: gameState.gameMode,
+    scores: gameState.scores,
+    lastMove: gameState.lastMove,
+    isGameActive: gameState.isGameActive,
+    canMakeMove: gameState.canMakeMove,
+    isDraw: gameState.isDraw,
+    jouerCase: gameState.jouerCase,
+    handleClick: gameState.handleClick,
+    resetGame: gameState.resetGame,
+    startGame: gameState.startGame,
+    changeMode: gameState.changeMode
+  }), [
+    gameState.grid,
+    gameState.currentPlayer,
+    gameState.winner,
+    gameState.gameMode,
+    gameState.scores,
+    gameState.lastMove,
+    gameState.isGameActive,
+    gameState.canMakeMove,
+    gameState.isDraw,
+    gameState.jouerCase,
+    gameState.handleClick,
+    gameState.resetGame,
+    gameState.startGame,
+    gameState.changeMode
+  ]);
+
   return (
-    <GameContext.Provider value={gameState}>
+    <GameContext.Provider value={contextValue}>
       {children}
     </GameContext.Provider>
   );
