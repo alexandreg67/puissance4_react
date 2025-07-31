@@ -27,7 +27,8 @@ const CellComponent: React.FC<OptimizedCellProps> = ({
 
   // PERFORMANCE FIX: Memoize expensive style calculations with cyberpunk theme
   const cellStyles = useMemo(() => {
-    const borderClass = deviceType === 'mobile' && windowSize.width < 428 ? 'border' : 'border-2';
+    // Use minimal borders on mobile to save space and reduce visual clutter
+    const borderClass = deviceType === 'mobile' ? 'border' : 'border-2';
     const baseClasses = `relative ${gridConfig.cellSize} rounded-full ${borderClass} focus:outline-none overflow-hidden ${interactionConfig.tapTargetSize}`;
     
     // GPU ACCELERATION FIX: Enhanced hardware acceleration for neon effects
@@ -39,15 +40,17 @@ const CellComponent: React.FC<OptimizedCellProps> = ({
     
     switch (value) {
       case 1: 
-        // Player 1: Neon Cyan pieces with energy core
-        colorClasses = `bg-gradient-radial from-neon-cyan/90 via-neon-cyan/70 to-neon-cyan/50 border-neon-cyan ${animationConfig.glowIntensity}`;
-        hoverClasses = isClickable && interactionConfig.hoverEffects ? `hover:${animationConfig.glowIntensity} hover:border-neon-cyan/80` : '';
+        // Player 1: Neon Cyan pieces with energy core (reduced glow on mobile)
+        const glowIntensity1 = deviceType === 'mobile' && windowSize.width < 428 ? 'shadow-lg' : animationConfig.glowIntensity;
+        colorClasses = `bg-gradient-radial from-neon-cyan/90 via-neon-cyan/70 to-neon-cyan/50 border-neon-cyan ${glowIntensity1}`;
+        hoverClasses = isClickable && interactionConfig.hoverEffects ? `hover:${glowIntensity1} hover:border-neon-cyan/80` : '';
         neonEffect = 'neon-cyan';
         break;
       case 2: 
-        // Player 2: Neon Magenta pieces with energy core
-        colorClasses = `bg-gradient-radial from-neon-magenta/90 via-neon-magenta/70 to-neon-magenta/50 border-neon-magenta ${animationConfig.glowIntensity}`;
-        hoverClasses = isClickable && interactionConfig.hoverEffects ? `hover:${animationConfig.glowIntensity} hover:border-neon-magenta/80` : '';
+        // Player 2: Neon Magenta pieces with energy core (reduced glow on mobile)
+        const glowIntensity2 = deviceType === 'mobile' && windowSize.width < 428 ? 'shadow-lg' : animationConfig.glowIntensity;
+        colorClasses = `bg-gradient-radial from-neon-magenta/90 via-neon-magenta/70 to-neon-magenta/50 border-neon-magenta ${glowIntensity2}`;
+        hoverClasses = isClickable && interactionConfig.hoverEffects ? `hover:${glowIntensity2} hover:border-neon-magenta/80` : '';
         neonEffect = 'neon-magenta';
         break;
       default: 

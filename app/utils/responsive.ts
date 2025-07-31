@@ -65,14 +65,14 @@ export const useResponsive = () => {
 export const getGridConfig = (deviceType: 'mobile' | 'tablet' | 'desktop', windowWidth?: number) => {
   switch (deviceType) {
     case 'mobile':
-      // Extra small screens (< 375px) - very compact, calculated to fit 7 columns
+      // Extra small screens (< 375px) - ultra compact to prevent overlap
       if (windowWidth && windowWidth < 375) {
         // Available width ≈ 320px - padding = ~300px
-        // 7 cells × 24px + 6 gaps × 4px = 168px + 24px = 192px (fits comfortably)
+        // 7 cells × 20px + 6 gaps × 6px = 140px + 36px = 176px (plenty of space)
         return {
-          cellSize: 'w-6 h-6',
-          gap: 'gap-1',
-          gridPadding: 'p-2',
+          cellSize: 'w-5 h-5',
+          gap: 'gap-1.5',
+          gridPadding: 'p-3',
           fontSize: 'text-xs',
           iconSize: 'w-3 h-3',
         };
@@ -80,20 +80,20 @@ export const getGridConfig = (deviceType: 'mobile' | 'tablet' | 'desktop', windo
       // Very small screens (375px - 428px) - iPhone size optimization
       if (windowWidth && windowWidth < 428) {
         // Available width ≈ 375px - padding = ~350px
-        // 7 cells × 32px + 6 gaps × 6px = 224px + 36px = 260px (fits well)
+        // 7 cells × 24px + 6 gaps × 8px = 168px + 48px = 216px (comfortable fit)
         return {
-          cellSize: 'w-8 h-8',
-          gap: 'gap-1.5',
-          gridPadding: 'p-3',
+          cellSize: 'w-6 h-6',
+          gap: 'gap-2',
+          gridPadding: 'p-4',
           fontSize: 'text-xs',
           iconSize: 'w-3 h-3',
         };
       }
-      // Small screens (428px - 640px) - standard mobile
+      // Small screens (428px - 640px) - standard mobile with more spacing
       return {
-        cellSize: 'w-10 h-10 sm:w-12 sm:h-12',
-        gap: 'gap-2 sm:gap-2.5',
-        gridPadding: 'p-4 sm:p-5',
+        cellSize: 'w-8 h-8 sm:w-10 sm:h-10',
+        gap: 'gap-2.5 sm:gap-3',
+        gridPadding: 'p-4 sm:p-6',
         fontSize: 'text-sm',
         iconSize: 'w-4 h-4',
       };
