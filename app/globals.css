@@ -2,5 +2,43 @@
 @tailwind components;
 @tailwind utilities;
 
+/* GPU Acceleration Utilities for Performance */
+@layer utilities {
+  .gpu-accelerated {
+    transform: translateZ(0);
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+  }
+  
+  .will-change-hover {
+    will-change: box-shadow, background-color, opacity;
+  }
+  
+  .will-change-transform {
+    will-change: transform;
+  }
+  
+  .will-change-auto {
+    will-change: auto;
+  }
+  
+  .transform-gpu {
+    transform: translateZ(0);
+  }
+  
+  .backface-visibility-hidden {
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+  }
+}
 
-
+/* Performance-optimized hover effects */
+@layer components {
+  .hover-shadow-smooth {
+    transition: box-shadow 150ms ease-out;
+  }
+  
+  .hover-shadow-smooth:hover {
+    box-shadow: 0 10px 25px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  }
+}
