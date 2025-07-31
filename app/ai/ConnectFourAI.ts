@@ -22,6 +22,8 @@ export type AIDifficulty = 'easy' | 'medium' | 'hard' | 'expert';
  *                                     with three consecutive pieces. Critical for threat detection.
  * @constant {number} TWO_IN_A_ROW - The threshold for recognizing patterns with two consecutive pieces.
  *                                   Used for early-game strategy and pattern building evaluation.
+ * @constant {number} MULTIPLE_THREATS_THRESHOLD - Minimum number of threats required to consider a move
+ *                                                as creating multiple threats. Set to 2 for strategic advantage.
  * @constant {number} MAX_SEARCH_DISTANCE - The maximum distance (in cells) the AI will search for patterns
  *                                          around a given position. Limits computational complexity while
  *                                          maintaining strategic depth. Set to 3 to cover all relevant
@@ -36,6 +38,7 @@ export const CONNECT_FOUR_CONSTANTS = {
   WIN_LENGTH: 4,              // Number of pieces needed to win
   THREE_IN_A_ROW: 3,          // Threat detection threshold
   TWO_IN_A_ROW: 2,            // Pattern recognition threshold
+  MULTIPLE_THREATS_THRESHOLD: 2, // Minimum threats for multiple threat detection
   MAX_SEARCH_DISTANCE: 3,     // Maximum distance to search for patterns
   WIN_SCORE: 10000,           // Score for winning positions
   THREAT_SCORE: 100,          // Score for creating threats
@@ -673,7 +676,7 @@ export class ConnectFourAI {
       }
     }
     
-    return threatCount >= CONNECT_FOUR_CONSTANTS.TWO_IN_A_ROW;
+    return threatCount >= CONNECT_FOUR_CONSTANTS.MULTIPLE_THREATS_THRESHOLD;
   }
 
   private hasThreeInRowWithOpenEnd(board: Board, row: number, col: number, deltaRow: number, deltaCol: number, player: number): boolean {
