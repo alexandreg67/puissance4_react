@@ -3,6 +3,7 @@
 import React, { memo, useCallback } from 'react';
 import { OptimizedCell } from './OptimizedCell';
 import { Board, Position } from '../types/game';
+import { useResponsive, getGridConfig, getSpacingConfig } from '../utils/responsive';
 
 interface OptimizedGridProps {
   grid: Board;
@@ -17,6 +18,11 @@ const GridComponent: React.FC<OptimizedGridProps> = ({
   canMakeMove, 
   lastMove 
 }) => {
+  // RESPONSIVE: Get device-specific configurations
+  const { deviceType } = useResponsive();
+  const gridConfig = getGridConfig(deviceType);
+  const spacingConfig = getSpacingConfig(deviceType);
+  
   // Memoized click handler to prevent recreating on every render
   const handleCellClick = useCallback((columnIndex: number) => {
     if (canMakeMove) {
@@ -25,7 +31,7 @@ const GridComponent: React.FC<OptimizedGridProps> = ({
   }, [canMakeMove, handleClick]);
 
   return (
-    <div className="flex flex-col items-center space-y-6">
+    <div className={`flex flex-col items-center ${spacingConfig.sectionSpacing}`}>
       {/* Cyberpunk Grid Container */}
       <div className="relative">
         {/* Outer glow effect */}
@@ -33,7 +39,7 @@ const GridComponent: React.FC<OptimizedGridProps> = ({
         
         {/* Main grid with advanced glassmorphism */}
         <div 
-          className="relative grid grid-cols-7 gap-3 p-8 backdrop-blur-lg rounded-3xl shadow-2xl border-2 border-neon-cyan/30 overflow-hidden"
+          className={`relative grid grid-cols-7 ${gridConfig.gap} ${gridConfig.gridPadding} backdrop-blur-lg rounded-3xl shadow-2xl border-2 border-neon-cyan/30 overflow-hidden`}
           style={{
             background: `
               linear-gradient(135deg, rgba(0, 255, 255, 0.05) 0%, rgba(255, 0, 255, 0.05) 100%),
@@ -110,7 +116,7 @@ const GridComponent: React.FC<OptimizedGridProps> = ({
       </div>
       
       {/* Futuristic Column Indicators */}
-      <div className="flex gap-3">
+      <div className={`flex ${gridConfig.gap}`}>
         {Array.from({ length: 7 }, (_, index) => (
           <div
             key={index}

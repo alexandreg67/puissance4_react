@@ -1,5 +1,6 @@
 import React, { memo, useMemo } from 'react';
 import { GameMode } from './Types';
+import { useResponsive, getLayoutConfig, getSpacingConfig, getTextConfig } from '../utils/responsive';
 import {
 	UserIcon,
 	UserGroupIcon,
@@ -12,22 +13,28 @@ type ScoreBoardProps = {
 };
 
 const ScoreBoardComponent: React.FC<ScoreBoardProps> = ({ scores, gameMode }) => {
+	// RESPONSIVE: Get device-specific configurations
+	const { deviceType } = useResponsive();
+	const layoutConfig = getLayoutConfig(deviceType);
+	const spacingConfig = getSpacingConfig(deviceType);
+	const textConfig = getTextConfig(deviceType);
+
 	// PERFORMANCE FIX: Memoize player displays with cyberpunk styling
 	const player1Display = useMemo(() => (
-		<div className="hud-panel text-neon-cyan border-neon-cyan rounded-xl p-6 backdrop-blur-lg group hover:shadow-neon-md transition-all duration-300">
+		<div className={`hud-panel text-neon-cyan border-neon-cyan rounded-xl ${spacingConfig.cardPadding} backdrop-blur-lg group hover:shadow-neon-md transition-all duration-300`}>
 			<div className="flex flex-col items-center space-y-4">
 				{/* Player 1 Header */}
 				<div className="flex items-center space-x-3">
 					<UserIcon className="h-8 w-8 text-neon-cyan animate-neon-pulse" />
 					<div className="text-center">
 						<div className="text-xs font-mono tracking-widest opacity-80">PLAYER</div>
-						<div className="text-lg font-display font-bold text-shadow-neon-sm">ONE</div>
+						<div className={`${textConfig.body} font-display font-bold text-shadow-neon-sm`}>ONE</div>
 					</div>
 				</div>
 				
 				{/* Score Display */}
 				<div className="text-center space-y-2">
-					<div className="text-3xl font-display font-black text-shadow-neon-md">
+					<div className={`${textConfig.subtitle} font-display font-black text-shadow-neon-md`}>
 						{scores['Player 1'].toString().padStart(2, '0')}
 					</div>
 					<div className="text-xs font-mono tracking-wider opacity-60">VICTORIES</div>
@@ -53,7 +60,7 @@ const ScoreBoardComponent: React.FC<ScoreBoardProps> = ({ scores, gameMode }) =>
 				</div>
 			</div>
 		</div>
-	), [scores]);
+	), [scores, spacingConfig, textConfig]);
 
 	const player2Display = useMemo(() => {
 		const isIA = gameMode === 'Player vs IA';
@@ -80,7 +87,7 @@ const ScoreBoardComponent: React.FC<ScoreBoardProps> = ({ scores, gameMode }) =>
 					
 					{/* Score Display */}
 					<div className="text-center space-y-2">
-						<div className="text-3xl font-display font-black text-shadow-neon-md">
+						<div className={`${textConfig.subtitle} font-display font-black text-shadow-neon-md`}>
 							{scores['Player 2'].toString().padStart(2, '0')}
 						</div>
 						<div className="text-xs font-mono tracking-wider opacity-60">VICTORIES</div>
@@ -122,10 +129,10 @@ const ScoreBoardComponent: React.FC<ScoreBoardProps> = ({ scores, gameMode }) =>
 				</div>
 			</div>
 		);
-	}, [gameMode, scores]);
+	}, [gameMode, scores, spacingConfig, textConfig]);
 
 	return (
-		<div className="flex flex-col lg:flex-row justify-center items-center w-full space-y-6 lg:space-y-0 lg:space-x-8 px-4">
+		<div className={`${layoutConfig.scoreboardLayout} justify-center items-center w-full ${spacingConfig.containerPadding}`}>
 			{/* Battle indicator */}
 			<div className="hidden lg:block order-2">
 				<div className="hud-panel text-neon-green border-neon-green px-4 py-2 rounded-full opacity-60">
