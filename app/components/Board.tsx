@@ -34,7 +34,7 @@ const Board: React.FC = () => {
 	}, []);
 
 	const jouerCase = (colIndex: number, player: Player): number | null => {
-		const newGrid = grid.map(row => [...row]); // Crée une copie profonde
+		const newGrid = [...grid];
 		let rowIndex: number | null = null;
 
 		for (let i = ROWS - 1; i >= 0; i--) {
@@ -68,7 +68,7 @@ const Board: React.FC = () => {
 			return;
 		}
 
-		// Vérifier s'il y a un match nul
+		// Vérifier s'il y a un match nul APRÈS avoir joué le coup
 		if (checkDraw()) {
 			setWinner('Draw');
 			return;
@@ -90,6 +90,9 @@ const Board: React.FC = () => {
 	};
 
 	const jouerIA = async () => {
+		// Vérifier si le jeu est déjà terminé
+		if (winner) return;
+		
 		setIsAIThinking(true);
 		
 		try {
@@ -104,16 +107,20 @@ const Board: React.FC = () => {
 			};
 			
 			const colIA = await aiManager.getLegacyMove(gameState);
-
 			const rowIndex = jouerCase(colIA, 'Player 2');
-			if (rowIndex === null) return;
+			
+			if (rowIndex === null) {
+				// Colonne pleine, match nul
+				setWinner('Draw');
+				return;
+			}
 	
 			if (checkWin(rowIndex, colIA, 'Player 2')) {
 				setWinner('Player 2');
-				setScores({
-					...scores,
-					'Player 2': scores['Player 2'] + 1,
-				});
+				setScores(prev => ({
+					...prev,
+					'Player 2': prev['Player 2'] + 1,
+				}));
 			} else if (checkDraw()) {
 				setWinner('Draw');
 			} else {
@@ -121,23 +128,25 @@ const Board: React.FC = () => {
 			}
 		} catch (error) {
 			console.error('AI Error:', error);
-			// Fallback to random move
+			// Fallback: vérifier s'il reste des colonnes disponibles
 			const availableColumns = [];
 			for (let col = 0; col < COLS; col++) {
 				if (grid[0][col] === null) {
 					availableColumns.push(col);
 				}
 			}
+			
 			if (availableColumns.length > 0) {
 				const randomCol = availableColumns[Math.floor(Math.random() * availableColumns.length)];
 				const rowIndex = jouerCase(randomCol, 'Player 2');
+				
 				if (rowIndex !== null) {
 					if (checkWin(rowIndex, randomCol, 'Player 2')) {
 						setWinner('Player 2');
-						setScores({
-							...scores,
-							'Player 2': scores['Player 2'] + 1,
-						});
+						setScores(prev => ({
+							...prev,
+							'Player 2': prev['Player 2'] + 1,
+						}));
 					} else if (checkDraw()) {
 						setWinner('Draw');
 					} else {
