@@ -1,11 +1,11 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { getAIManager } from '../ai/AIManager';
 import Grid from './Grid';
 import ScoreBoard from './ScoreBoard';
 import GameControls from './GameControls';
-import AIDifficultySelector from './AIDifficultySelector';
+import { AIDifficultySelector } from './AIDifficultySelector';
 import { CellValue, GameMode, Player } from './Types';
 import { AIDifficulty } from '../types/game';
 
@@ -17,14 +17,24 @@ const Board: React.FC = () => {
 		Array.from({ length: ROWS }, () => Array(COLS).fill(null))
 	);
 	const [currentPlayer, setCurrentPlayer] = useState<Player>('Player 1');
-	const [winner, setWinner] = useState<string | null>(null);
+	const [winner, setWinner] = useState<string | 'Draw' | null>(null);
 	const [gameMode, setGameMode] = useState<GameMode | null>(null);
 	const [scores, setScores] = useState({ 'Player 1': 0, 'Player 2': 0 });
 	const [aiDifficulty, setAiDifficulty] = useState<AIDifficulty>('medium');
 	const [isAIThinking, setIsAIThinking] = useState(false);
+	const aiTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+	// Nettoyer le timeout lorsque le composant est démonté
+	useEffect(() => {
+		return () => {
+			if (aiTimeoutRef.current) {
+				clearTimeout(aiTimeoutRef.current);
+			}
+		};
+	}, []);
 
 	const jouerCase = (colIndex: number, player: Player): number | null => {
-		const newGrid = [...grid];
+		const newGrid = grid.map(row => [...row]); // Crée une copie profonde
 		let rowIndex: number | null = null;
 
 		for (let i = ROWS - 1; i >= 0; i--) {
@@ -58,11 +68,22 @@ const Board: React.FC = () => {
 			return;
 		}
 
+		// Vérifier s'il y a un match nul
+		if (checkDraw()) {
+			setWinner('Draw');
+			return;
+		}
+
 		const nextPlayer = currentPlayer === 'Player 1' ? 'Player 2' : 'Player 1';
 		setCurrentPlayer(nextPlayer);
 
 		if (gameMode === 'Player vs IA' && nextPlayer === 'Player 2') {
-			setTimeout(() => {
+			// Nettoyer le timeout précédent s'il existe
+			if (aiTimeoutRef.current) {
+				clearTimeout(aiTimeoutRef.current);
+			}
+			
+			aiTimeoutRef.current = setTimeout(() => {
 				jouerIA();
 			}, 500);
 		}
@@ -86,13 +107,15 @@ const Board: React.FC = () => {
 
 			const rowIndex = jouerCase(colIA, 'Player 2');
 			if (rowIndex === null) return;
-
+	
 			if (checkWin(rowIndex, colIA, 'Player 2')) {
 				setWinner('Player 2');
 				setScores({
 					...scores,
 					'Player 2': scores['Player 2'] + 1,
 				});
+			} else if (checkDraw()) {
+				setWinner('Draw');
 			} else {
 				setCurrentPlayer('Player 1');
 			}
@@ -108,9 +131,22 @@ const Board: React.FC = () => {
 			if (availableColumns.length > 0) {
 				const randomCol = availableColumns[Math.floor(Math.random() * availableColumns.length)];
 				const rowIndex = jouerCase(randomCol, 'Player 2');
-				if (rowIndex !== null && !checkWin(rowIndex, randomCol, 'Player 2')) {
-					setCurrentPlayer('Player 1');
+				if (rowIndex !== null) {
+					if (checkWin(rowIndex, randomCol, 'Player 2')) {
+						setWinner('Player 2');
+						setScores({
+							...scores,
+							'Player 2': scores['Player 2'] + 1,
+						});
+					} else if (checkDraw()) {
+						setWinner('Draw');
+					} else {
+						setCurrentPlayer('Player 1');
+					}
 				}
+			} else {
+				// Plus de colonnes disponibles, match nul
+				setWinner('Draw');
 			}
 		} finally {
 			setIsAIThinking(false);
@@ -151,6 +187,11 @@ const Board: React.FC = () => {
 		if (count >= 4) return true;
 		
 		return false;
+	};
+
+	const checkDraw = (): boolean => {
+		// Vérifie si la grille est pleine (match nul)
+		return grid[0].every(cell => cell !== null);
 	};
 
 	const resetGame = () => {

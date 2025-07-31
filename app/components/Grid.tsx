@@ -3,7 +3,7 @@ import Cell from './Cell';
 import { CellValue } from './Types';
 
 type GridProps = {
-	grid: (CellValue | null)[][];
+	grid: CellValue[][];
 	handleClick: (colIndex: number) => void;
 };
 

@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react';
+import { CellValue } from './Types';
 
 interface CellProps {
-	color: 'red' | 'yellow' | null;
+	color: CellValue;
 }
 
 const Cell: React.FC<CellProps> = ({ color }) => {
