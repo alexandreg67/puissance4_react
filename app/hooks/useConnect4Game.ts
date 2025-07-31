@@ -1,4 +1,4 @@
-import { useState, useCallback, useMemo, useEffect } from 'react';
+import { useState, useCallback, useMemo, useEffect, useRef } from 'react';
 import { Board, Player, GameState, GameMode, GameScore, Position, DEFAULT_GAME_CONFIG } from '../types/game';
 import { IAGameState } from '../components/IA';
 import { 
@@ -45,6 +45,15 @@ export const useConnect4Game = (): UseConnect4GameReturn => {
   const [gameMode, setGameMode] = useState<GameMode | null>(null);
   const [scores, setScores] = useState<GameScore>(INITIAL_SCORES);
   const [lastMove, setLastMove] = useState<Position | null>(null);
+
+  // Refs to avoid infinite loops in useEffect
+  const gridRef = useRef<Board>(grid);
+  const aiProcessingRef = useRef<boolean>(false);
+
+  // Update ref when grid changes
+  useEffect(() => {
+    gridRef.current = grid;
+  }, [grid]);
 
   // Computed values
   const isGameActive = useMemo(() => !winner && gameMode !== null, [winner, gameMode]);
@@ -99,54 +108,83 @@ export const useConnect4Game = (): UseConnect4GameReturn => {
     // AI will move in useEffect if it's AI mode and AI's turn
   }, [canMakeMove, jouerCase, currentPlayer, winner]);
 
-  // AI move effect
+  // AI move effect - use refs to prevent infinite loops
   useEffect(() => {
     if (
       gameMode === 'Player vs IA' &&
       currentPlayer === 2 &&
       !winner &&
-      !isDraw
+      !isDraw &&
+      !aiProcessingRef.current
     ) {
-      const aiMoveTimer = setTimeout(() => {
-        // Import AI logic dynamically to avoid circular dependencies
-        import('../components/IA').then((module) => {
-          const IA = module.default;
-          try {
-            const gameState: IAGameState = {
-              grid: grid.map(row => 
-                row.map(cell => cell === 1 ? 1 : cell === 2 ? 2 : 0)
-              ),
-              nbLigne: DEFAULT_GAME_CONFIG.rows,
-              nbColonne: DEFAULT_GAME_CONFIG.cols
-            };
+      aiProcessingRef.current = true;
+      
+      const aiMoveTimer = setTimeout(async () => {
+        try {
+          // Import AI logic dynamically
+          const { default: IA } = await import('../components/IA');
+          
+          const currentGrid = gridRef.current;
+          const gameState: IAGameState = {
+            grid: currentGrid.map(row => 
+              row.map(cell => cell === 1 ? 1 : cell === 2 ? 2 : 0)
+            ),
+            nbLigne: DEFAULT_GAME_CONFIG.rows,
+            nbColonne: DEFAULT_GAME_CONFIG.cols
+          };
 
-            const colIA = IA.choixColonne(gameState);
-            const rowIndex = jouerCase(colIA, 2);
+          const colIA = IA.choixColonne(gameState);
+          
+          // Make AI move using current grid from ref
+          if (isValidColumn(currentGrid, colIA)) {
+            const result = makeMove(currentGrid, colIA, 2);
+            if (result) {
+              const { newBoard, position } = result;
+              setGrid(newBoard);
+              setLastMove(position);
 
-            if (rowIndex !== null && !winner) {
-              setCurrentPlayer(1);
-            }
-          } catch (error) {
-            console.error('AI Error:', error);
-            // Fallback to random move
-            const validColumns = [];
-            for (let col = 0; col < DEFAULT_GAME_CONFIG.cols; col++) {
-              if (isValidColumn(grid, col)) {
-                validColumns.push(col);
+              // Check for win
+              if (checkWin(newBoard, position.row, position.col, 2)) {
+                setWinner('Player 2');
+                setScores(prev => ({
+                  ...prev,
+                  'Player 2': prev['Player 2'] + 1
+                }));
+              } else {
+                setCurrentPlayer(1);
               }
             }
-            if (validColumns.length > 0) {
-              const randomCol = validColumns[Math.floor(Math.random() * validColumns.length)];
-              jouerCase(randomCol, 2);
+          }
+        } catch (error) {
+          console.error('AI Error:', error);
+          // Fallback to random move
+          const currentGrid = gridRef.current;
+          const validColumns = [];
+          for (let col = 0; col < DEFAULT_GAME_CONFIG.cols; col++) {
+            if (isValidColumn(currentGrid, col)) {
+              validColumns.push(col);
+            }
+          }
+          if (validColumns.length > 0) {
+            const randomCol = validColumns[Math.floor(Math.random() * validColumns.length)];
+            const result = makeMove(currentGrid, randomCol, 2);
+            if (result) {
+              setGrid(result.newBoard);
+              setLastMove(result.position);
               setCurrentPlayer(1);
             }
           }
-        });
+        } finally {
+          aiProcessingRef.current = false;
+        }
       }, DEFAULT_GAME_CONFIG.aiDelay);
 
-      return () => clearTimeout(aiMoveTimer);
+      return () => {
+        clearTimeout(aiMoveTimer);
+        aiProcessingRef.current = false;
+      };
     }
-  }, [gameMode, currentPlayer, winner, isDraw, grid, jouerCase]);
+  }, [gameMode, currentPlayer, winner, isDraw]);
 
   // Game control functions
   const resetGame = useCallback(() => {
