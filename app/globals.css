@@ -2,5 +2,397 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Import futuristic fonts */
+@import url('https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400;1,700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap');
 
+/* Base cyberpunk styling */
+@layer base {
+  html {
+    scroll-behavior: smooth;
+    /* Prevent horizontal scrolling on mobile */
+    overflow-x: hidden;
+    width: 100%;
+    max-width: 100vw;
+  }
+  
+  body {
+    /* Prevent horizontal scrolling on mobile */
+    overflow-x: hidden;
+    width: 100%;
+    max-width: 100vw;
+    background: linear-gradient(135deg, #0A0A0A 0%, #000814 50%, #1A0D2E 100%);
+    background-attachment: fixed;
+    color: #FFFFFF;
+    font-family: 'Space Mono', 'Courier New', monospace;
+    overflow-x: hidden;
+  }
+  
+  /* Cyberpunk scrollbar */
+  ::-webkit-scrollbar {
+    width: 8px;
+  }
+  
+  ::-webkit-scrollbar-track {
+    background: rgba(10, 10, 10, 0.8);
+  }
+  
+  ::-webkit-scrollbar-thumb {
+    background: linear-gradient(180deg, #00FFFF, #FF00FF);
+    border-radius: 4px;
+  }
+  
+  ::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(180deg, #FF00FF, #00FFFF);
+  }
+  
+  /* Selection styling */
+  ::selection {
+    background: rgba(0, 255, 255, 0.3);
+    color: #FFFFFF;
+  }
+  
+  ::-moz-selection {
+    background: rgba(0, 255, 255, 0.3);
+    color: #FFFFFF;
+  }
+}
 
+/* GPU Acceleration Utilities for Performance */
+@layer utilities {
+  .gpu-accelerated {
+    transform: translateZ(0);
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+  }
+  
+  .will-change-hover {
+    will-change: box-shadow, background-color, opacity;
+  }
+  
+  .will-change-transform {
+    will-change: transform;
+  }
+  
+  .will-change-auto {
+    will-change: auto;
+  }
+  
+  .transform-gpu {
+    transform: translateZ(0);
+  }
+  
+  .backface-visibility-hidden {
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+  }
+  
+  /* Neon glow utilities */
+  .neon-glow-sm {
+    filter: drop-shadow(0 0 5px currentColor);
+  }
+  
+  .neon-glow-md {
+    filter: drop-shadow(0 0 10px currentColor) drop-shadow(0 0 20px currentColor);
+  }
+  
+  .neon-glow-lg {
+    filter: drop-shadow(0 0 15px currentColor) drop-shadow(0 0 30px currentColor);
+  }
+  
+  .neon-glow-xl {
+    filter: drop-shadow(0 0 20px currentColor) drop-shadow(0 0 40px currentColor);
+  }
+  
+  /* Cyberpunk grid background */
+  .cyber-grid {
+    background-image: 
+      linear-gradient(rgba(0, 255, 255, 0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0, 255, 255, 0.03) 1px, transparent 1px);
+    background-size: 20px 20px;
+  }
+  
+  /* Hologram effect */
+  .hologram {
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .hologram::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(0, 255, 255, 0.1), transparent);
+    animation: hologram-sweep 3s linear infinite;
+    pointer-events: none;
+  }
+  
+  @keyframes hologram-sweep {
+    0% {
+      left: -100%;
+    }
+    100% {
+      left: 100%;
+    }
+  }
+  
+  /* Glitch effect */
+  .glitch {
+    position: relative;
+  }
+  
+  .glitch::before,
+  .glitch::after {
+    content: attr(data-text);
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: inherit;
+  }
+  
+  .glitch::before {
+    animation: glitch-1 0.5s infinite;
+    color: #FF00FF;
+    z-index: -1;
+  }
+  
+  .glitch::after {
+    animation: glitch-2 0.5s infinite;
+    color: #00FFFF;
+    z-index: -2;
+  }
+  
+  @keyframes glitch-1 {
+    0%, 14%, 15%, 49%, 50%, 99%, 100% {
+      transform: translate(0);
+    }
+    15%, 49% {
+      transform: translate(-2px, 1px);
+    }
+  }
+  
+  @keyframes glitch-2 {
+    0%, 20%, 21%, 62%, 63%, 99%, 100% {
+      transform: translate(0);
+    }
+    21%, 62% {
+      transform: translate(2px, -1px);
+    }
+  }
+  
+  /* Neon border utilities */
+  .neon-border {
+    border: 2px solid currentColor;
+    box-shadow: 
+      0 0 5px currentColor,
+      0 0 10px currentColor,
+      inset 0 0 5px currentColor;
+  }
+  
+  .neon-border-thick {
+    border: 3px solid currentColor;
+    box-shadow: 
+      0 0 10px currentColor,
+      0 0 20px currentColor,
+      inset 0 0 10px currentColor;
+  }
+  
+  /* Cyberpunk card effect */
+  .cyber-card {
+    background: rgba(26, 13, 46, 0.6);
+    border: 1px solid rgba(0, 255, 255, 0.3);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    box-shadow: 
+      0 8px 32px rgba(0, 0, 0, 0.37),
+      inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  }
+  
+  .cyber-card-hover {
+    transition: all 0.3s ease;
+  }
+  
+  .cyber-card-hover:hover {
+    border-color: rgba(0, 255, 255, 0.8);
+    box-shadow: 
+      0 0 20px rgba(0, 255, 255, 0.3),
+      0 8px 32px rgba(0, 0, 0, 0.37),
+      inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    transform: translateY(-2px);
+  }
+  
+  /* Matrix rain effect */
+  .matrix-bg {
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .matrix-bg::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-image: radial-gradient(circle at 20% 50%, rgba(0, 255, 255, 0.05) 0%, transparent 50%),
+                      radial-gradient(circle at 80% 20%, rgba(255, 0, 255, 0.05) 0%, transparent 50%),
+                      radial-gradient(circle at 40% 80%, rgba(0, 255, 65, 0.05) 0%, transparent 50%);
+    animation: matrix-float 20s ease-in-out infinite;
+    pointer-events: none;
+  }
+  
+  @keyframes matrix-float {
+    0%, 100% {
+      transform: translate(0, 0) scale(1);
+    }
+    33% {
+      transform: translate(30px, -30px) scale(1.1);
+    }
+    66% {
+      transform: translate(-20px, 20px) scale(0.9);
+    }
+  }
+}
+
+/* Neon Component Styles */
+@layer components {
+  /* Neon button component */
+  .neon-button {
+    @apply 
+      relative
+      px-6 py-3
+      bg-transparent
+      border-2 border-current
+      text-current
+      font-mono font-semibold
+      tracking-wider
+      uppercase
+      transition-all duration-300 ease-out
+      transform-gpu
+      will-change-transform;
+    
+    background: linear-gradient(45deg, transparent 30%, rgba(255, 255, 255, 0.03) 50%, transparent 70%);
+    box-shadow: 
+      0 0 5px currentColor,
+      inset 0 0 5px rgba(255, 255, 255, 0.1);
+  }
+  
+  .neon-button:hover {
+    @apply 
+      scale-105
+      brightness-110;
+    
+    box-shadow: 
+      0 0 20px currentColor,
+      0 0 40px currentColor,
+      inset 0 0 20px rgba(255, 255, 255, 0.2);
+    text-shadow: 0 0 10px currentColor;
+  }
+  
+  .neon-button:active {
+    @apply 
+      scale-95
+      brightness-125;
+  }
+  
+  /* Futuristic input styling */
+  .cyber-input {
+    @apply 
+      bg-transparent
+      border-2 border-current
+      text-current
+      px-4 py-2
+      font-mono
+      placeholder-current placeholder-opacity-50
+      focus:outline-none
+      transition-all duration-300;
+    
+    box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.5);
+  }
+  
+  .cyber-input:focus {
+    box-shadow: 
+      0 0 10px currentColor,
+      inset 0 0 10px rgba(0, 0, 0, 0.5);
+    text-shadow: 0 0 5px currentColor;
+  }
+  
+  /* HUD-style panel */
+  .hud-panel {
+    @apply 
+      relative
+      bg-opacity-10
+      border border-current
+      backdrop-blur-sm;
+    
+    background: 
+      linear-gradient(135deg, rgba(0, 255, 255, 0.03) 0%, rgba(255, 0, 255, 0.03) 100%),
+      rgba(10, 10, 10, 0.8);
+    box-shadow: 
+      0 0 20px rgba(0, 0, 0, 0.5),
+      inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  }
+  
+  .hud-panel::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, currentColor, transparent);
+    opacity: 0.5;
+  }
+  
+  .hud-panel::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, currentColor, transparent);
+    opacity: 0.3;
+  }
+  
+  /* Performance-optimized hover effects */
+  .hover-shadow-smooth {
+    transition: box-shadow 150ms ease-out;
+  }
+  
+  .hover-shadow-smooth:hover {
+    box-shadow: 0 10px 25px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  }
+  
+  /* Accessibility - Reduced motion */
+  @media (prefers-reduced-motion: reduce) {
+    .neon-button,
+    .cyber-card-hover,
+    .hologram::before,
+    .matrix-bg::before {
+      animation: none !important;
+      transition: none !important;
+    }
+    
+    .neon-button:hover {
+      transform: none !important;
+    }
+  }
+  
+  /* High contrast mode */
+  @media (prefers-contrast: high) {
+    .neon-button,
+    .cyber-input,
+    .hud-panel {
+      border-width: 3px !important;
+      box-shadow: none !important;
+      background: #000000 !important;
+      color: #FFFFFF !important;
+    }
+  }
+}
