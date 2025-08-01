@@ -132,9 +132,14 @@ const ScoreBoardComponent: React.FC<ScoreBoardProps> = ({ scores, gameMode }) =>
 	}, [gameMode, scores, spacingConfig.cardPadding, textConfig.body, textConfig.subtitle]);
 
 	return (
-		<div className={`${layoutConfig.scoreboardLayout} justify-center items-center w-full ${spacingConfig.containerPadding}`}>
-			{/* Battle indicator */}
-			<div className="hidden lg:block order-2">
+		<div className={`${deviceType === 'mobile' ? layoutConfig.scoreboardLayout : 'grid grid-cols-3 gap-8'} items-center w-full ${spacingConfig.containerPadding}`}>
+			{/* Player 1 */}
+			<div className={`${deviceType === 'mobile' ? 'order-1' : 'justify-self-end'}`}>
+				{player1Display}
+			</div>
+			
+			{/* Battle indicator - VS */}
+			<div className={`${deviceType === 'mobile' ? 'hidden' : 'justify-self-center'}`}>
 				<div className="hud-panel text-neon-green border-neon-green px-4 py-2 rounded-full opacity-60">
 					<div className="flex items-center space-x-2 text-xs font-mono tracking-wider">
 						<div className="w-2 h-2 bg-current rounded-full animate-neon-pulse"></div>
@@ -144,13 +149,8 @@ const ScoreBoardComponent: React.FC<ScoreBoardProps> = ({ scores, gameMode }) =>
 				</div>
 			</div>
 			
-			{/* Player 1 */}
-			<div className="order-1 lg:order-1">
-				{player1Display}
-			</div>
-			
 			{/* Player 2 */}
-			<div className="order-3 lg:order-3">
+			<div className={`${deviceType === 'mobile' ? 'order-3' : 'justify-self-start'}`}>
 				{player2Display}
 			</div>
 		</div>
