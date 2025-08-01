@@ -231,7 +231,7 @@ GameStatus.displayName = 'GameStatus';
 // Main game content component
 const GameContent: React.FC = memo(() => {
   const { grid, gameMode, scores, lastMove, aiDifficulty, aiThinking } = useGameState();
-  const { handleClick, changeMode, setAIDifficulty } = useGameActions();
+  const { handleClick, changeMode, setAIDifficulty, resetGame } = useGameActions();
 
   if (!gameMode) {
     return <GameModeSelection />;
@@ -297,6 +297,25 @@ const GameContent: React.FC = memo(() => {
 
       {/* Cyberpunk Game Controls */}
       <div className="flex flex-wrap justify-center gap-6 mt-8">
+        <button
+          onClick={resetGame}
+          className="neon-button text-neon-green border-neon-green hover:text-white group relative"
+          style={{
+            transform: 'translateZ(0)',
+            backfaceVisibility: 'hidden',
+            willChange: 'box-shadow, color'
+          }}
+          aria-label="Recommencer la partie"
+        >
+          <div className="flex items-center space-x-2">
+            <span className="text-lg group-hover:animate-bounce transition-transform duration-300">🔄</span>
+            <span className="font-bold tracking-wider">RESTART GAME</span>
+          </div>
+          
+          {/* Hologram sweep effect */}
+          <div className="absolute inset-0 bg-hologram-gradient opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none rounded"></div>
+        </button>
+        
         <button
           onClick={changeMode}
           className="neon-button text-neon-orange border-neon-orange hover:text-white group relative"

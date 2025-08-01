@@ -268,7 +268,12 @@ export const useConnect4Game = (): UseConnect4GameReturn => {
   const setAIDifficulty = useCallback((difficulty: AIDifficulty) => {
     setAIDifficultyState(difficulty);
     aiManagerRef.current.setDifficulty(difficulty);
-  }, []);
+    
+    // Auto-restart the game when difficulty changes during active gameplay
+    if (isGameActive && gameMode === "Player vs IA") {
+      resetGame();
+    }
+  }, [isGameActive, gameMode, resetGame]);
 
   const getAIInfo = useCallback(() => {
     return aiManagerRef.current.getAIInfo();
