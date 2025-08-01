@@ -22,10 +22,10 @@ const ScoreBoardComponent: React.FC<ScoreBoardProps> = ({ scores, gameMode }) =>
 	// Get responsive panel width for uniform sizing - adjusted sizes to prevent overflow
 	const getPanelWidth = useMemo(() => {
 		switch(deviceType) {
-			case 'mobile': return 'w-56 min-w-56 max-w-56'; // 224px - réduit de 256px pour éviter débordement
-			case 'tablet': return 'w-72 min-w-72 max-w-72';  // 288px - gardé
-			case 'desktop': return 'w-80 min-w-80 max-w-80'; // 320px - gardé
-			default: return 'w-72 min-w-72 max-w-72';
+			case 'mobile': return 'w-56 min-w-56 max-w-56'; // 224px - ajusté pour mobile
+			case 'tablet': return 'w-56 min-w-56 max-w-56';  // 224px - réduit pour gérer la plage 768-820px
+			case 'desktop': return 'w-80 min-w-80 max-w-80'; // 320px - gardé pour desktop
+			default: return 'w-64 min-w-64 max-w-64';
 		}
 	}, [deviceType]);
 
