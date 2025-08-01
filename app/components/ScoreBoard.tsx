@@ -30,7 +30,7 @@ const ScoreBoardComponent: React.FC<ScoreBoardProps> = ({ scores, gameMode }) =>
 	}, [deviceType]);
 
 	// Memoized layout classes to avoid repetitive conditional logic
-	// Using complete objects as dependencies to ensure proper memoization
+	// Using deviceType (primitive) and imported configs (layoutConfig, spacingConfig) as dependencies
 	const layoutClasses = useMemo(() => {
 		const isMobile = deviceType === 'mobile';
 		return {
