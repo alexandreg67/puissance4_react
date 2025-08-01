@@ -30,6 +30,7 @@ const ScoreBoardComponent: React.FC<ScoreBoardProps> = ({ scores, gameMode }) =>
 	}, [deviceType]);
 
 	// Memoized layout classes to avoid repetitive conditional logic
+	// Using complete objects as dependencies to ensure proper memoization
 	const layoutClasses = useMemo(() => {
 		const isMobile = deviceType === 'mobile';
 		return {
@@ -40,7 +41,7 @@ const ScoreBoardComponent: React.FC<ScoreBoardProps> = ({ scores, gameMode }) =>
 			vsElement: isMobile ? 'hidden' : 'justify-self-center',
 			player2: isMobile ? 'order-3' : 'justify-self-start'
 		};
-	}, [deviceType, layoutConfig.scoreboardLayout, spacingConfig.containerPadding]);
+	}, [deviceType, layoutConfig, spacingConfig]);
 
 	// PERFORMANCE FIX: Memoize player displays with cyberpunk styling
 	const player1Display = useMemo(() => (
