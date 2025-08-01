@@ -29,6 +29,19 @@ const ScoreBoardComponent: React.FC<ScoreBoardProps> = ({ scores, gameMode }) =>
 		}
 	}, [deviceType]);
 
+	// Memoized layout classes to avoid repetitive conditional logic
+	const layoutClasses = useMemo(() => {
+		const isMobile = deviceType === 'mobile';
+		return {
+			container: isMobile 
+				? `${layoutConfig.scoreboardLayout} items-center w-full ${spacingConfig.containerPadding}`
+				: `grid grid-cols-3 gap-8 items-center w-full ${spacingConfig.containerPadding}`,
+			player1: isMobile ? 'order-1' : 'justify-self-end',
+			vsElement: isMobile ? 'hidden' : 'justify-self-center',
+			player2: isMobile ? 'order-3' : 'justify-self-start'
+		};
+	}, [deviceType, layoutConfig.scoreboardLayout, spacingConfig.containerPadding]);
+
 	// PERFORMANCE FIX: Memoize player displays with cyberpunk styling
 	const player1Display = useMemo(() => (
 		<div className={`hud-panel text-neon-cyan border-neon-cyan rounded-xl ${spacingConfig.cardPadding} ${getPanelWidth} backdrop-blur-lg group hover:shadow-neon-md transition-all duration-300`}>
@@ -142,14 +155,14 @@ const ScoreBoardComponent: React.FC<ScoreBoardProps> = ({ scores, gameMode }) =>
 	}, [gameMode, scores, spacingConfig.cardPadding, textConfig.body, textConfig.subtitle, getPanelWidth]);
 
 	return (
-		<div className={`${deviceType === 'mobile' ? layoutConfig.scoreboardLayout : 'grid grid-cols-3 gap-8'} items-center w-full ${spacingConfig.containerPadding}`}>
+		<div className={layoutClasses.container}>
 			{/* Player 1 */}
-			<div className={`${deviceType === 'mobile' ? 'order-1' : 'justify-self-end'}`}>
+			<div className={layoutClasses.player1}>
 				{player1Display}
 			</div>
 			
 			{/* Battle indicator - VS */}
-			<div className={`${deviceType === 'mobile' ? 'hidden' : 'justify-self-center'}`}>
+			<div className={layoutClasses.vsElement}>
 				<div className="hud-panel text-neon-green border-neon-green px-4 py-2 rounded-full opacity-60">
 					<div className="flex items-center space-x-2 text-xs font-mono tracking-wider">
 						<div className="w-2 h-2 bg-current rounded-full animate-neon-pulse"></div>
@@ -160,7 +173,7 @@ const ScoreBoardComponent: React.FC<ScoreBoardProps> = ({ scores, gameMode }) =>
 			</div>
 			
 			{/* Player 2 */}
-			<div className={`${deviceType === 'mobile' ? 'order-3' : 'justify-self-start'}`}>
+			<div className={layoutClasses.player2}>
 				{player2Display}
 			</div>
 		</div>
