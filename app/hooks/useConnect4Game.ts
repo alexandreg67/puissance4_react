@@ -271,9 +271,13 @@ export const useConnect4Game = (): UseConnect4GameReturn => {
     
     // Auto-restart the game when difficulty changes during active gameplay
     if (isGameActive && gameMode === "Player vs IA") {
-      resetGame();
+      // Use resetGame function directly since it's stable (useCallback with empty deps)
+      setGrid(createEmptyBoard());
+      setCurrentPlayer(1);
+      setWinner(null);
+      setLastMove(null);
     }
-  }, [isGameActive, gameMode, resetGame]);
+  }, [isGameActive, gameMode]);
 
   const getAIInfo = useCallback(() => {
     return aiManagerRef.current.getAIInfo();
