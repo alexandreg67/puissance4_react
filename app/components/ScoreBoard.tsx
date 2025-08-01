@@ -19,12 +19,12 @@ const ScoreBoardComponent: React.FC<ScoreBoardProps> = ({ scores, gameMode }) =>
 	const spacingConfig = getSpacingConfig(deviceType, windowSize.width);
 	const textConfig = getTextConfig(deviceType, windowSize.width);
 
-	// Get responsive panel width for uniform sizing
+	// Get responsive panel width for uniform sizing - adjusted sizes to prevent overflow
 	const getPanelWidth = useMemo(() => {
 		switch(deviceType) {
-			case 'mobile': return 'w-64 min-w-64 max-w-64';
-			case 'tablet': return 'w-72 min-w-72 max-w-72';
-			case 'desktop': return 'w-80 min-w-80 max-w-80';
+			case 'mobile': return 'w-56 min-w-56 max-w-56'; // 224px - réduit de 256px pour éviter débordement
+			case 'tablet': return 'w-72 min-w-72 max-w-72';  // 288px - gardé
+			case 'desktop': return 'w-80 min-w-80 max-w-80'; // 320px - gardé
 			default: return 'w-72 min-w-72 max-w-72';
 		}
 	}, [deviceType]);
@@ -35,13 +35,13 @@ const ScoreBoardComponent: React.FC<ScoreBoardProps> = ({ scores, gameMode }) =>
 		const isMobile = deviceType === 'mobile';
 		return {
 			container: isMobile 
-				? `${layoutConfig.scoreboardLayout} items-center w-full ${spacingConfig.containerPadding}`
-				: `grid grid-cols-3 gap-8 items-center w-full ${spacingConfig.containerPadding}`,
+				? `flex flex-col space-y-4 items-center w-full ${spacingConfig.containerPadding}`
+				: `grid grid-cols-3 gap-6 items-center w-full ${spacingConfig.containerPadding}`,
 			player1: isMobile ? 'order-1' : 'justify-self-end',
 			vsElement: isMobile ? 'hidden' : 'justify-self-center',
 			player2: isMobile ? 'order-3' : 'justify-self-start'
 		};
-	}, [deviceType, layoutConfig, spacingConfig]);
+	}, [deviceType, spacingConfig]);
 
 	// PERFORMANCE FIX: Memoize player displays with cyberpunk styling
 	const player1Display = useMemo(() => (

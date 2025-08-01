@@ -31,9 +31,9 @@ const GridComponent: React.FC<OptimizedGridProps> = ({
   }, [canMakeMove, handleClick]);
 
   return (
-    <div className={`flex flex-col items-center ${spacingConfig.sectionSpacing} w-full max-w-full`}>
+    <div className={`flex flex-col items-center justify-center ${spacingConfig.sectionSpacing} w-full max-w-full`}>
       {/* Cyberpunk Grid Container */}
-      <div className="relative w-full max-w-full overflow-hidden">
+      <div className="relative w-full max-w-full overflow-hidden flex justify-center">
         {/* Outer glow effect - reduced on mobile */}
         <div className={`absolute bg-neon-gradient-1 opacity-20 blur-xl rounded-3xl animate-neon-pulse-slow ${
           deviceType === 'mobile' ? '-inset-1 xs:-inset-2' : '-inset-4'
@@ -60,7 +60,7 @@ const GridComponent: React.FC<OptimizedGridProps> = ({
                 inset 0 1px 0 rgba(255, 255, 255, 0.1)
               `,
             // Ensure the grid fits within viewport
-            maxWidth: deviceType === 'mobile' ? 'calc(100vw - 16px)' : 'none',
+            maxWidth: deviceType === 'mobile' ? 'calc(100vw - 32px)' : 'none',
             width: 'fit-content'
           }}
           role="grid"
