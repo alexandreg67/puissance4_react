@@ -19,9 +19,19 @@ const ScoreBoardComponent: React.FC<ScoreBoardProps> = ({ scores, gameMode }) =>
 	const spacingConfig = getSpacingConfig(deviceType, windowSize.width);
 	const textConfig = getTextConfig(deviceType, windowSize.width);
 
+	// Get responsive panel width for uniform sizing
+	const getPanelWidth = useMemo(() => {
+		switch(deviceType) {
+			case 'mobile': return 'w-64 min-w-64 max-w-64';
+			case 'tablet': return 'w-72 min-w-72 max-w-72';
+			case 'desktop': return 'w-80 min-w-80 max-w-80';
+			default: return 'w-72 min-w-72 max-w-72';
+		}
+	}, [deviceType]);
+
 	// PERFORMANCE FIX: Memoize player displays with cyberpunk styling
 	const player1Display = useMemo(() => (
-		<div className={`hud-panel text-neon-cyan border-neon-cyan rounded-xl ${spacingConfig.cardPadding} backdrop-blur-lg group hover:shadow-neon-md transition-all duration-300`}>
+		<div className={`hud-panel text-neon-cyan border-neon-cyan rounded-xl ${spacingConfig.cardPadding} ${getPanelWidth} backdrop-blur-lg group hover:shadow-neon-md transition-all duration-300`}>
 			<div className="flex flex-col items-center space-y-4">
 				{/* Player 1 Header */}
 				<div className="flex items-center space-x-3">
@@ -60,7 +70,7 @@ const ScoreBoardComponent: React.FC<ScoreBoardProps> = ({ scores, gameMode }) =>
 				</div>
 			</div>
 		</div>
-	), [scores, spacingConfig.cardPadding, textConfig.body, textConfig.subtitle]);
+	), [scores, spacingConfig.cardPadding, textConfig.body, textConfig.subtitle, getPanelWidth]);
 
 	const player2Display = useMemo(() => {
 		const isIA = gameMode === 'Player vs IA';
@@ -70,7 +80,7 @@ const ScoreBoardComponent: React.FC<ScoreBoardProps> = ({ scores, gameMode }) =>
 			: <UserGroupIcon className="h-8 w-8 text-neon-magenta animate-neon-pulse" />;
 		
 		return (
-			<div className={`hud-panel text-neon-magenta border-neon-magenta rounded-xl ${spacingConfig.cardPadding} backdrop-blur-lg group hover:shadow-neon-md transition-all duration-300`}>
+			<div className={`hud-panel text-neon-magenta border-neon-magenta rounded-xl ${spacingConfig.cardPadding} ${getPanelWidth} backdrop-blur-lg group hover:shadow-neon-md transition-all duration-300`}>
 				<div className="flex flex-col items-center space-y-4">
 					{/* Player 2 Header */}
 					<div className="flex items-center space-x-3">
@@ -129,7 +139,7 @@ const ScoreBoardComponent: React.FC<ScoreBoardProps> = ({ scores, gameMode }) =>
 				</div>
 			</div>
 		);
-	}, [gameMode, scores, spacingConfig.cardPadding, textConfig.body, textConfig.subtitle]);
+	}, [gameMode, scores, spacingConfig.cardPadding, textConfig.body, textConfig.subtitle, getPanelWidth]);
 
 	return (
 		<div className={`${deviceType === 'mobile' ? layoutConfig.scoreboardLayout : 'grid grid-cols-3 gap-8'} items-center w-full ${spacingConfig.containerPadding}`}>
