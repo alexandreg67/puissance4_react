@@ -238,7 +238,7 @@ const GameContent: React.FC = memo(() => {
   }
 
   return (
-    <div className="flex flex-col items-center space-y-4 xs:space-y-6 sm:space-y-8 w-full max-w-5xl mx-auto px-1 py-2 xs:px-2 xs:py-4 sm:p-6 matrix-bg min-h-screen overflow-hidden">
+    <div className="flex flex-col items-center space-y-4 xs:space-y-6 sm:space-y-8 w-full max-w-5xl mx-auto px-4 py-4 sm:p-6 matrix-bg min-h-screen">
       {/* Cyberpunk Header */}
       <div className="text-center space-y-3 xs:space-y-4 sm:space-y-6 py-4 xs:py-6 sm:py-8">
         <div className="relative">
@@ -381,11 +381,11 @@ export const ModernBoard: React.FC = memo(() => {
   return (
     <ErrorBoundary fallback={<GameErrorFallback />}>
       <GameProvider>
-        <div className="min-h-screen cyber-grid relative overflow-hidden">
+        <div className="min-h-screen cyber-grid relative overflow-x-hidden w-full">
           {/* Optimized animated background particles */}
           <BackgroundParticles />
           
-          <div className="container mx-auto px-4 relative z-10">
+          <div className="container mx-auto px-2 xs:px-4 relative z-10 w-full max-w-full">
             <Suspense fallback={<GameLoading />}>
               <GameContent />
             </Suspense>
